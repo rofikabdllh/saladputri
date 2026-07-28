@@ -31,16 +31,16 @@ const db = getFirestore(app);
 // DATA TOKO (sesuaikan)
 // ------------------------------------------------------------
 const WA_NUMBER = "6281915779457";
-const REKENING_INFO = "BCA 1234567890 a.n. Putri Amelia";
+const REKENING_INFO = "BRI 682401001050507 a.n. Eka Putri Nugraheni";
 
 const STORE_INFO = {
   rating: "4.9",
-  totalReviews: "128 ulasan",
+  totalReviews: "258 ulasan",
   totalOrders: "500+ pesanan",
   jamOperasional: "08.00 – 20.00 WIB",
   estimasiProses: "15–30 menit setelah pembayaran dikonfirmasi",
-  lokasi: "📍 Yogyakarta, Indonesia",
-  mapsUrl: "https://maps.google.com",
+  lokasi: "📍 Purwokerto, Indonesia",
+  mapsUrl: "https://maps.app.goo.gl/pgM2RfDkDbaK4Ucb7?g_st=ac",
 };
 
 const SIZES = [
