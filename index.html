@@ -43,12 +43,10 @@
   .modal-hidden { opacity: 0; pointer-events: none; }
   .modal-hidden .modal-panel { transform: translateY(16px) scale(0.98); }
 
-  /* tap/click feedback for all interactive elements */
   button, a, .tap { touch-action: manipulation; transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
   button:active, a:active, .tap:active { transform: scale(0.96); }
   button:disabled { transform: none !important; opacity: 0.7; cursor: not-allowed; }
 
-  /* accessible focus ring (keyboard only) */
   :focus-visible { outline: 2px solid #E8637F; outline-offset: 2px; border-radius: 6px; }
 
   .bg-blob { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: 0.45; z-index: 0; }
@@ -69,12 +67,10 @@
 
   .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.75rem); }
 
-  /* toast notifications */
   #toastContainer { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 80; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; padding: 0 1rem; pointer-events: none; }
   .toast-item { background: #4A2E3C; color: #FFF6F3; font-size: 0.875rem; font-weight: 500; padding: 10px 18px; border-radius: 9999px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(10px); transition: opacity 0.25s ease, transform 0.25s ease; max-width: 90vw; text-align: center; }
   .toast-item.toast-show { opacity: 1; transform: translateY(0); }
 
-  /* size option card */
   .size-card { position: relative; }
   .size-card .popular-tag { position: absolute; top: -8px; right: -6px; }
 </style>
@@ -100,7 +96,7 @@
     </div>
   </header>
 
-  <!-- ===================== HERO (compact) ===================== -->
+  <!-- ===================== HERO ===================== -->
   <section class="relative overflow-hidden pt-8 pb-6 px-5">
     <div class="bg-blob w-64 h-64 bg-watermelon/40 -top-16 -left-16"></div>
     <div class="bg-blob w-56 h-56 bg-kiwi/25 top-0 right-0"></div>
@@ -120,7 +116,6 @@
           Tanpa jelly, isi buah bisa request. Checkout satu menit, kirim bukti transfer langsung lewat WhatsApp.
         </p>
 
-        <!-- social proof -->
         <div class="mt-4 flex items-center justify-center md:justify-start gap-4 text-sm">
           <span class="flex items-center gap-1 font-semibold">
             <span class="text-mango text-base">★★★★★</span>
@@ -139,7 +134,6 @@
         </div>
       </div>
 
-      <!-- Foto/ilustrasi hero. Taruh foto asli di images/hero-salad.jpg untuk menggantikan ilustrasi. -->
       <div class="photo-frame rounded-[2rem] aspect-[4/3] md:aspect-square shadow-xl">
         <div class="fallback-art">
           <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
@@ -191,9 +185,7 @@
 
     <div class="bg-white rounded-3xl border border-dark/10 p-5 sm:p-7 shadow-sm grid md:grid-cols-2 gap-8">
 
-      <!-- Info produk -->
       <div>
-        <!-- Taruh foto asli di images/produk-salad.jpg untuk menggantikan ilustrasi -->
         <div class="photo-frame rounded-2xl w-full aspect-[4/3] mb-4 shadow-md">
           <div class="fallback-art flex items-center justify-center">
             <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" class="w-2/3 h-2/3">
@@ -229,18 +221,13 @@
         </div>
       </div>
 
-      <!-- Pilihan pesanan -->
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Pilih Ukuran</p>
-        <div id="sizeOptions" class="grid grid-cols-2 gap-2 mb-2">
-          <!-- size buttons injected by app.js -->
-        </div>
+        <div id="sizeOptions" class="grid grid-cols-2 gap-2 mb-2"></div>
         <p id="upsellTip" class="text-xs text-kiwi-dark bg-kiwi/10 rounded-lg px-3 py-2 mb-4 hidden"></p>
 
         <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Pilih Topping</p>
-        <div id="toppingOptions" class="flex flex-wrap gap-2 mb-2">
-          <!-- topping buttons injected by app.js -->
-        </div>
+        <div id="toppingOptions" class="flex flex-wrap gap-2 mb-2"></div>
         <p id="crossSellTip" class="text-xs text-watermelon-dark bg-watermelon/10 rounded-lg px-3 py-2 mb-4 hidden"></p>
 
         <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Jumlah</p>
@@ -250,7 +237,6 @@
           <button id="productQtyPlus" type="button" aria-label="Tambah jumlah" class="w-11 h-11 rounded-full border border-dark/20 hover:bg-dark/5 hover:border-dark/30 flex items-center justify-center text-lg">+</button>
         </div>
 
-        <!-- Ringkasan real-time -->
         <div class="bg-cream rounded-2xl p-4 mb-5 border border-dark/10">
           <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-1.5">Pesanan Kamu</p>
           <div id="liveOrderSummary" class="text-sm text-dark/80 space-y-0.5"></div>
@@ -264,7 +250,7 @@
     </div>
   </main>
 
-  <!-- ===================== SOCIAL PROOF / REVIEW ===================== -->
+  <!-- ===================== SOCIAL PROOF ===================== -->
   <section class="max-w-5xl mx-auto px-5 pb-16">
     <div class="flex items-center justify-between mb-4">
       <h2 class="font-display font-600 text-2xl">Kata Pelanggan</h2>
@@ -331,9 +317,7 @@
       <button id="closeCartBtn" aria-label="Tutup keranjang" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">✕</button>
     </div>
 
-    <div id="cartItemsWrap" class="flex-1 overflow-y-auto scrollbar-none px-5 py-4 space-y-4">
-      <!-- cart items injected here -->
-    </div>
+    <div id="cartItemsWrap" class="flex-1 overflow-y-auto scrollbar-none px-5 py-4 space-y-4"></div>
 
     <div id="cartEmptyState" class="flex-1 flex flex-col items-center justify-center text-center px-8 text-dark/50">
       <span class="text-4xl mb-2">🍇</span>
@@ -360,7 +344,6 @@
         <button id="closeCheckoutBtn" aria-label="Tutup" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">✕</button>
       </div>
 
-      <!-- step indicator -->
       <div class="flex items-center gap-1.5 mb-5 text-[11px] font-semibold text-dark/40">
         <span class="flex items-center gap-1 text-kiwi-dark"><span class="w-4 h-4 rounded-full bg-kiwi-dark text-white flex items-center justify-center text-[9px]">✓</span> Keranjang</span>
         <span class="flex-1 h-px bg-dark/10 mx-1"></span>
@@ -486,7 +469,6 @@
     </button>
   </div>
 
-  <!-- toast notifications -->
   <div id="toastContainer"></div>
 
   <script type="module" src="app.js"></script>
