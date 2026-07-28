@@ -28,22 +28,21 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ------------------------------------------------------------
-// DATA TOKO — ⚠️ semua nilai di bawah ini aman & mudah diganti
+// DATA TOKO (sesuaikan)
 // ------------------------------------------------------------
-const WA_NUMBER = "6281915779457"; // nomor WA toko (format 62xxxx, tanpa +)
-const REKENING_INFO = "BCA 1234567890 a.n. Putri Amelia"; // ⚠️ ganti dengan rekening asli kamu
+const WA_NUMBER = "6281915779457";
+const REKENING_INFO = "BCA 1234567890 a.n. Putri Amelia";
 
 const STORE_INFO = {
   rating: "4.9",
-  totalReviews: "128 ulasan", // ganti sesuai jumlah ulasan asli kamu
-  totalOrders: "500+ pesanan", // ganti sesuai jumlah pesanan asli kamu
+  totalReviews: "128 ulasan",
+  totalOrders: "500+ pesanan",
   jamOperasional: "08.00 – 20.00 WIB",
   estimasiProses: "15–30 menit setelah pembayaran dikonfirmasi",
-  lokasi: "📍 Yogyakarta, Indonesia", // ganti dengan lokasi asli kamu
-  mapsUrl: "https://maps.google.com", // ganti dengan link Google Maps toko asli kamu
+  lokasi: "📍 Yogyakarta, Indonesia",
+  mapsUrl: "https://maps.google.com",
 };
 
-// Ukuran & harga (sesuai daftar harga kamu). "popular: true" akan diberi badge.
 const SIZES = [
   { id: "200ml", label: "200 ml", harga: 10000 },
   { id: "300ml", label: "300 ml", harga: 12000 },
@@ -54,7 +53,6 @@ const SIZES = [
   { id: "1000ml", label: "1000 ml", harga: 42000 },
 ];
 
-// Pilihan topping (tidak menambah harga)
 const TOPPINGS = ["Keju", "Coklat", "Mix (Coklat & Keju)"];
 
 // ------------------------------------------------------------
@@ -63,8 +61,7 @@ const TOPPINGS = ["Keju", "Coklat", "Mix (Coklat & Keju)"];
 let selectedSizeId = SIZES[0].id;
 let selectedTopping = TOPPINGS[0];
 let productQty = 1;
-
-let cart = []; // [{ id, ukuran, topping, harga, qty }]
+let cart = [];
 
 // ------------------------------------------------------------
 // ELEMEN DOM
@@ -166,7 +163,7 @@ function generateOrderNumber() {
 }
 
 // ------------------------------------------------------------
-// TOAST NOTIFICATION
+// TOAST
 // ------------------------------------------------------------
 function showToast(message) {
   const toast = document.createElement("div");
@@ -195,7 +192,7 @@ async function copyToClipboard(text, btn) {
 }
 
 // ------------------------------------------------------------
-// RENDER: PILIHAN PRODUK (ukuran, topping, qty, ringkasan live)
+// RENDER: PILIHAN PRODUK
 // ------------------------------------------------------------
 function renderSizeOptions() {
   sizeOptions.innerHTML = SIZES.map(
@@ -345,7 +342,6 @@ function renderCart() {
   const count = getCartCount();
   const total = getCartTotal();
 
-  // header badge
   cartBadge.textContent = count;
   cartBadge.classList.toggle("hidden", count === 0);
   cartBadge.classList.toggle("flex", count > 0);
@@ -355,13 +351,11 @@ function renderCart() {
     cartBadge.classList.add("animate-badge-pop");
   }
 
-  // mobile floating bar
   mobileCartCount.textContent = count;
   mobileCartTotal.textContent = formatRupiah(total);
   mobileCartBar.classList.toggle("hidden", count === 0);
   mobileCartBar.classList.toggle("flex", count > 0);
 
-  // desktop sticky cart (hidden on mobile always; shown as flex on lg+ only when cart has items)
   desktopCartCount.textContent = count;
   desktopCartTotal.textContent = formatRupiah(total);
   desktopCartBar.classList.toggle("lg:flex", count > 0);
@@ -470,15 +464,13 @@ closeCheckoutBtn.addEventListener("click", closeCheckout);
 checkoutOverlay.addEventListener("click", closeCheckout);
 closeSuccessBtn.addEventListener("click", () => {
   closeSuccess();
-  // reset keranjang setelah pesanan selesai dibuat
   cart = [];
   renderCart();
 });
 
-// close topmost modal/drawer on Escape (keyboard accessibility)
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
-  if (!successModal.classList.contains("modal-hidden")) return; // biarkan user klik tombol eksplisit
+  if (!successModal.classList.contains("modal-hidden")) return;
   if (!checkoutModal.classList.contains("modal-hidden")) {
     closeCheckout();
   } else if (!cartDrawer.classList.contains("drawer-hidden")) {
@@ -587,7 +579,7 @@ checkoutForm.addEventListener("submit", async (e) => {
       items,
       totalHarga,
       status: "Menunggu Pembayaran",
-      createdAt: serverTimestamp(),
+      createdAt: serverTimestamp(), // <- sentinel, diizinkan oleh security rules
     });
 
     const orderSummary = { nomorOrder, nama, wa, alamat, catatan, items, totalHarga };
