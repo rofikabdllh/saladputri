@@ -579,7 +579,7 @@ checkoutForm.addEventListener("submit", async (e) => {
       items,
       totalHarga,
       status: "Menunggu Pembayaran",
-      createdAt: serverTimestamp(), // <- sentinel, diizinkan oleh security rules
+      createdAt: serverTimestamp(),
     });
 
     const orderSummary = { nomorOrder, nama, wa, alamat, catatan, items, totalHarga };
