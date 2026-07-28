@@ -6,11 +6,9 @@
   <title>Admin — Salad Buah Putri</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
   
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -34,14 +32,12 @@
     }
   </script>
 
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <style>
     body { font-family: 'Poppins', sans-serif; background: #FFF6F3; }
     .font-display { font-family: 'Quicksand', sans-serif; }
 
-    /* Skeleton */
     .skeleton {
       background: linear-gradient(90deg, #f0ece9 25%, #e6e0db 50%, #f0ece9 75%);
       background-size: 200% 100%;
@@ -53,7 +49,6 @@
       100% { background-position: 200% 0; }
     }
 
-    /* Toast */
     .toast-container {
       position: fixed;
       bottom: 1.5rem;
@@ -84,7 +79,6 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Badge Status */
     .badge-status {
       padding: 0.2rem 0.7rem;
       border-radius: 9999px;
@@ -93,6 +87,12 @@
       text-transform: capitalize;
       display: inline-block;
       letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .badge-status:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .badge-menunggu { background: #FDE68A; color: #92400E; }
     .badge-dibayar { background: #93C5FD; color: #1E3A8A; }
@@ -101,7 +101,6 @@
     .badge-selesai { background: #86EFAC; color: #14532D; }
     .badge-batal { background: #FCA5A5; color: #7F1D1D; }
 
-    /* Tabel */
     .table-row-zebra:nth-child(even) {
       background: #faf7f5;
     }
@@ -109,7 +108,6 @@
       background: #f1ebe7 !important;
     }
 
-    /* Truncate */
     .truncate-detail {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -119,16 +117,15 @@
       line-height: 1.5em;
     }
 
-    /* Stat Card */
     .stat-card {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
     }
     .stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
 
-    /* Filter Buttons */
     .filter-btn {
       padding: 0.4rem 1rem;
       border-radius: 9999px;
@@ -149,7 +146,6 @@
       border-color: #4A2E3C;
     }
 
-    /* Status Dropdown */
     .status-dropdown {
       background: white;
       border: 1px solid #e5e0db;
@@ -163,21 +159,23 @@
     }
     .status-dropdown:focus {
       border-color: #E8637F;
-      ring: 2px solid #FF8FA6;
+      outline: 2px solid #FF8FA6;
     }
 
-    /* Responsif */
     @media (max-width: 640px) {
       .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-      .table-wrap { overflow-x: auto; }
-      .action-buttons { flex-wrap: wrap; gap: 0.25rem; }
+      .desktop-table { display: none; }
+      .mobile-card-list { display: flex; flex-direction: column; gap: 0.75rem; }
       .toast-container { left: 1rem; right: 1rem; bottom: 1rem; max-width: 100%; }
+    }
+    @media (min-width: 641px) {
+      .mobile-card-list { display: none; }
+      .desktop-table { display: table; }
     }
   </style>
 </head>
 <body>
-
-  <!-- ========== LOGIN SECTION ========== -->
+  <!-- Login Section -->
   <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
     <div class="max-w-md w-full bg-white rounded-3xl border border-dark/10 shadow-lg p-6 sm:p-8">
       <h2 class="font-display font-600 text-3xl text-center">🔐 Admin Login</h2>
@@ -201,14 +199,17 @@
     </div>
   </div>
 
-  <!-- ========== DASHBOARD ========== -->
+  <!-- Dashboard -->
   <div id="adminContent" class="hidden">
     <!-- Header -->
     <header class="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-dark/10">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
           <span class="text-2xl">🥗</span>
-          <span class="font-display font-600 text-xl tracking-tight">Dashboard</span>
+          <div>
+            <h1 class="font-display font-600 text-lg tracking-tight" id="greetingText">Dashboard Admin</h1>
+            <p class="text-xs text-dark/50" id="userEmailDisplay">admin@saladbuahputri.com</p>
+          </div>
         </div>
         <div class="flex items-center gap-3">
           <span class="text-xs font-medium text-kiwi-dark flex items-center gap-1">
@@ -218,22 +219,21 @@
             </span>
             Live
           </span>
+          <span class="text-xs text-dark/40 hidden sm:inline" id="lastUpdatedText">Terakhir diperbarui: --</span>
           <button id="logoutBtn" class="text-sm font-semibold text-dark/60 hover:text-watermelon-dark transition">Logout</button>
         </div>
       </div>
     </header>
-
     <!-- Main -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-
-      <!-- ===== STATISTIK ===== -->
+      <!-- Statistik -->
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 stat-grid" id="statsContainer">
-        <!-- akan diisi JS -->
+        <!-- JS akan isi dengan skeleton -->
       </div>
 
-      <!-- ===== SEARCH & FILTER ===== -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div class="relative flex-1 max-w-sm">
+      <!-- Search & Filter -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div class="relative flex-1 max-w-md sm:max-w-lg">
           <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-dark/30 text-sm"></i>
           <input type="text" id="searchInput" placeholder="Cari No. Order, Nama, atau WhatsApp..."
                  class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-dark/10 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon text-sm" />
@@ -247,9 +247,12 @@
         </div>
       </div>
 
-      <!-- ===== TABEL ===== -->
-      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden shadow-sm">
-        <div class="overflow-x-auto table-wrap">
+      <!-- Result Count -->
+      <div id="resultCount" class="text-sm text-dark/50 mb-3 hidden">0 pesanan ditemukan</div>
+
+      <!-- Tabel Desktop -->
+      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden shadow-sm desktop-table">
+        <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead class="bg-dark text-cream">
               <tr>
@@ -265,28 +268,31 @@
               </tr>
             </thead>
             <tbody id="ordersTableBody">
-              <!-- akan diisi JS -->
+              <!-- JS akan isi -->
             </tbody>
           </table>
         </div>
-
         <div id="loadingState" class="py-12 text-center text-dark/40 hidden">
           <div class="flex flex-col items-center gap-2">
             <i class="fas fa-spinner fa-spin text-2xl text-kiwi"></i>
             <span>Memuat data pesanan...</span>
           </div>
         </div>
-
         <div id="emptyState" class="hidden py-16 text-center">
           <i class="fas fa-inbox text-4xl text-dark/20 mb-3"></i>
           <p class="text-dark/50 font-medium">Belum ada pesanan masuk.</p>
           <p class="text-dark/30 text-sm">Pantau terus, pesanan pertama akan muncul di sini.</p>
         </div>
       </div>
+
+      <!-- Mobile Card List -->
+      <div id="mobileCardList" class="mobile-card-list">
+        <!-- JS akan isi -->
+      </div>
     </main>
   </div>
 
-  <!-- ===== MODAL DETAIL ===== -->
+  <!-- Modal Detail -->
   <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-dark/40 backdrop-blur-sm">
     <div class="bg-white max-w-lg w-full rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between mb-4">
@@ -297,7 +303,7 @@
     </div>
   </div>
 
-  <!-- ===== TOAST ===== -->
+  <!-- Toast -->
   <div id="toastContainer" class="toast-container"></div>
 
   <script type="module" src="admin.js"></script>
