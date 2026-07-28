@@ -1,7 +1,3 @@
-// ============================================================
-// admin.js – Dashboard Admin dengan Statistik, Filter, Aksi
-// ============================================================
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
   getFirestore,
@@ -20,9 +16,6 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-// ------------------------------------------------------------
-// KONFIGURASI FIREBASE
-// ------------------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyA2IElw69ToQOkJuXnEusj6t8g_etlM6Wg",
   authDomain: "saladbuahputri-3f98f.firebaseapp.com",
@@ -37,9 +30,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// ------------------------------------------------------------
-// ELEMEN DOM
-// ------------------------------------------------------------
+// DOM Elements
 const loginSection = document.getElementById("loginSection");
 const adminContent = document.getElementById("adminContent");
 const loginForm = document.getElementById("loginForm");
@@ -47,26 +38,29 @@ const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
 const loginError = document.getElementById("loginError");
 const logoutBtn = document.getElementById("logoutBtn");
+const greetingText = document.getElementById("greetingText");
+const userEmailDisplay = document.getElementById("userEmailDisplay");
+const lastUpdatedText = document.getElementById("lastUpdatedText");
 
 const tableBody = document.getElementById("ordersTableBody");
+const mobileCardList = document.getElementById("mobileCardList");
 const loadingState = document.getElementById("loadingState");
 const emptyState = document.getElementById("emptyState");
 const statsContainer = document.getElementById("statsContainer");
 const searchInput = document.getElementById("searchInput");
 const filterBtns = document.querySelectorAll(".filter-btn");
+const resultCount = document.getElementById("resultCount");
 const detailModal = document.getElementById("detailModal");
 const detailContent = document.getElementById("detailContent");
 const closeDetailModal = document.getElementById("closeDetailModal");
 const toastContainer = document.getElementById("toastContainer");
 
 let ordersData = [];
-let filteredOrders = [];
 let currentFilter = "semua";
 let unsubscribeOrders = null;
+let currentUser = null;
 
-// ------------------------------------------------------------
-// HELPER
-// ------------------------------------------------------------
+// Helpers
 function formatRupiah(number) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -99,9 +93,18 @@ function getStatusBadge(status) {
   return map[status] || "badge-menunggu";
 }
 
-// ------------------------------------------------------------
-// TOAST
-// ------------------------------------------------------------
+function formatStatusLabel(status) {
+  const map = {
+    "Menunggu Pembayaran": "Menunggu",
+    "Sudah Dibayar": "Dibayar",
+    "Diproses": "Diproses",
+    "Siap Dikirim": "Siap Kirim",
+    "Selesai": "Selesai",
+    "Dibatalkan": "Batal",
+  };
+  return map[status] || status;
+}
+
 function showToast(message, icon = "fa-check-circle", bg = "dark") {
   const toast = document.createElement("div");
   toast.className = "toast-item";
@@ -117,9 +120,13 @@ function showToast(message, icon = "fa-check-circle", bg = "dark") {
   }, 3000);
 }
 
-// ------------------------------------------------------------
-// LOGIN / LOGOUT
-// ------------------------------------------------------------
+function updateLastUpdated() {
+  const now = new Date();
+  const time = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  lastUpdatedText.textContent = `Terakhir diperbarui: ${time} WIB`;
+}
+
+// Login / Logout
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.classList.add("hidden");
@@ -135,15 +142,17 @@ logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
 });
 
-// ------------------------------------------------------------
-// AUTH STATE
-// ------------------------------------------------------------
+// Auth State
 onAuthStateChanged(auth, (user) => {
   if (user) {
+    currentUser = user;
     loginSection.classList.add("hidden");
     adminContent.classList.remove("hidden");
+    greetingText.textContent = `Halo, ${user.displayName || "Admin"} 👋`;
+    userEmailDisplay.textContent = user.email || "admin@saladbuahputri.com";
     if (!unsubscribeOrders) startListeningOrders();
   } else {
+    currentUser = null;
     loginSection.classList.remove("hidden");
     adminContent.classList.add("hidden");
     if (unsubscribeOrders) {
@@ -153,21 +162,22 @@ onAuthStateChanged(auth, (user) => {
     ordersData = [];
     renderTable([]);
     renderStats([]);
+    renderMobileCards([]);
   }
 });
 
-// ------------------------------------------------------------
-// LISTENER FIRESTORE
-// ------------------------------------------------------------
+// Firestore Listener
 function startListeningOrders() {
   const q = query(collection(db, "pesanan"), orderBy("createdAt", "desc"));
   unsubscribeOrders = onSnapshot(q,
     (snapshot) => {
       loadingState.classList.add("hidden");
+      updateLastUpdated();
       if (snapshot.empty) {
         ordersData = [];
         renderTable([]);
         renderStats([]);
+        renderMobileCards([]);
         emptyState.classList.remove("hidden");
         return;
       }
@@ -183,9 +193,7 @@ function startListeningOrders() {
   );
 }
 
-// ------------------------------------------------------------
-// FILTER & SEARCH
-// ------------------------------------------------------------
+// Apply Filters & Search
 function applyFiltersAndSearch() {
   const searchTerm = searchInput.value.toLowerCase().trim();
   let filtered = [...ordersData];
@@ -227,9 +235,16 @@ function applyFiltersAndSearch() {
     );
   }
 
-  filteredOrders = filtered;
   renderTable(filtered);
+  renderMobileCards(filtered);
   renderStats(filtered);
+
+  if (filtered.length > 0) {
+    resultCount.textContent = `${filtered.length} pesanan ditemukan`;
+    resultCount.classList.remove("hidden");
+  } else {
+    resultCount.classList.add("hidden");
+  }
 }
 
 searchInput.addEventListener("input", applyFiltersAndSearch);
@@ -243,14 +258,12 @@ filterBtns.forEach(btn => {
   });
 });
 
-// ------------------------------------------------------------
-// RENDER STATISTIK
-// ------------------------------------------------------------
+// Render Stats
 function renderStats(orders) {
   const total = orders.length;
   const omzet = orders.reduce((s, o) => s + (o.totalHarga || 0), 0);
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
   const baruHariIni = orders.filter(o => {
     if (!o.createdAt) return false;
     const d = o.createdAt.toDate();
@@ -261,16 +274,16 @@ function renderStats(orders) {
   const selesai = orders.filter(o => o.status === "Selesai").length;
 
   const stats = [
-    { label: "Total Pesanan", value: total, icon: "fa-box", color: "text-kiwi-dark" },
-    { label: "Omzet", value: formatRupiah(omzet), icon: "fa-rupiah-sign", color: "text-watermelon-dark" },
-    { label: "Baru Hari Ini", value: baruHariIni, icon: "fa-calendar-day", color: "text-mango" },
-    { label: "Menunggu", value: menunggu, icon: "fa-clock", color: "text-orange-400" },
-    { label: "Diproses", value: diproses, icon: "fa-spinner", color: "text-kiwi" },
-    { label: "Selesai", value: selesai, icon: "fa-check-circle", color: "text-green-500" },
+    { label: "Total Pesanan", value: total, icon: "fa-box", color: "text-kiwi-dark", filter: "semua" },
+    { label: "Omzet", value: formatRupiah(omzet), icon: "fa-rupiah-sign", color: "text-watermelon-dark", filter: "semua" },
+    { label: "Baru Hari Ini", value: baruHariIni, icon: "fa-calendar-day", color: "text-mango", filter: "hari-ini" },
+    { label: "Menunggu", value: menunggu, icon: "fa-clock", color: "text-orange-400", filter: "belum-proses" },
+    { label: "Diproses", value: diproses, icon: "fa-spinner", color: "text-kiwi", filter: "belum-proses" },
+    { label: "Selesai", value: selesai, icon: "fa-check-circle", color: "text-green-500", filter: "selesai" },
   ];
 
   statsContainer.innerHTML = stats.map(s => `
-    <div class="stat-card bg-white rounded-2xl p-4 border border-dark/10 shadow-sm hover:shadow-md transition">
+    <div class="stat-card bg-white rounded-2xl p-4 border border-dark/10 shadow-sm hover:shadow-md transition" data-filter="${s.filter}">
       <div class="flex items-center gap-2 text-dark/50 text-xs font-semibold uppercase tracking-wide">
         <i class="fas ${s.icon} ${s.color}"></i>
         <span>${s.label}</span>
@@ -278,11 +291,23 @@ function renderStats(orders) {
       <p class="font-display font-700 text-xl mt-1">${s.value}</p>
     </div>
   `).join("");
+
+  document.querySelectorAll(".stat-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const filter = card.dataset.filter;
+      filterBtns.forEach(b => {
+        b.classList.remove("active", "bg-dark", "text-cream");
+        if (b.dataset.filter === filter) {
+          b.classList.add("active", "bg-dark", "text-cream");
+        }
+      });
+      currentFilter = filter;
+      applyFiltersAndSearch();
+    });
+  });
 }
 
-// ------------------------------------------------------------
-// RENDER TABEL
-// ------------------------------------------------------------
+// Render Table Desktop
 function renderTable(orders) {
   if (!orders.length) {
     tableBody.innerHTML = `
@@ -312,7 +337,9 @@ function renderTable(orders) {
       </td>
       <td class="px-4 py-3.5 font-bold text-watermelon-dark whitespace-nowrap">${formatRupiah(order.totalHarga)}</td>
       <td class="px-4 py-3.5">
-        <span class="badge-status ${getStatusBadge(order.status)}">${order.status || "—"}</span>
+        <span class="badge-status ${getStatusBadge(order.status)}" data-id="${order.id}" data-status="${order.status}">
+          ${formatStatusLabel(order.status)}
+        </span>
       </td>
       <td class="px-4 py-3.5">
         <div class="flex flex-wrap items-center gap-1 action-buttons">
@@ -338,7 +365,7 @@ function renderTable(orders) {
     </tr>
   `).join("");
 
-  // Detail
+  // Event: Detail
   document.querySelectorAll(".detail-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.dataset.id;
@@ -347,7 +374,19 @@ function renderTable(orders) {
     });
   });
 
-  // Ubah Status
+  // Event: Status Badge click -> focus dropdown
+  document.querySelectorAll(".badge-status").forEach(badge => {
+    badge.addEventListener("click", () => {
+      const row = badge.closest("tr");
+      const dropdown = row?.querySelector(".status-dropdown");
+      if (dropdown) {
+        dropdown.focus();
+        dropdown.click();
+      }
+    });
+  });
+
+  // Event: Status Dropdown change
   document.querySelectorAll(".status-dropdown").forEach(select => {
     select.addEventListener("change", async (e) => {
       const id = e.target.dataset.id;
@@ -356,7 +395,7 @@ function renderTable(orders) {
     });
   });
 
-  // Hapus
+  // Event: Delete
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.dataset.id;
@@ -368,22 +407,94 @@ function renderTable(orders) {
   });
 }
 
-// ------------------------------------------------------------
-// UPDATE STATUS
-// ------------------------------------------------------------
+// Render Mobile Cards
+function renderMobileCards(orders) {
+  if (!orders.length) {
+    mobileCardList.innerHTML = `
+      <div class="text-center py-8 text-dark/40">
+        <i class="fas fa-inbox text-2xl mb-2"></i>
+        <p>Tidak ada pesanan yang cocok.</p>
+      </div>
+    `;
+    return;
+  }
+
+  mobileCardList.innerHTML = orders.map((order) => `
+    <div class="bg-white rounded-2xl border border-dark/10 p-4 shadow-sm hover:shadow-md transition">
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-mono text-xs text-dark/70">${order.nomorOrder || "—"}</span>
+        <span class="badge-status ${getStatusBadge(order.status)} text-[10px]">${formatStatusLabel(order.status)}</span>
+      </div>
+      <div class="flex items-center justify-between mb-1">
+        <span class="font-semibold text-sm">${order.nama || "—"}</span>
+        <span class="font-bold text-watermelon-dark text-sm">${formatRupiah(order.totalHarga)}</span>
+      </div>
+      <a href="https://wa.me/${(order.whatsapp || "").replace(/\D/g, "")}" target="_blank" 
+         class="text-kiwi-dark text-xs hover:underline flex items-center gap-1 mb-2">
+        <i class="fab fa-whatsapp"></i> ${order.whatsapp || "—"}
+      </a>
+      <div class="flex flex-wrap items-center gap-1 mt-2 pt-2 border-t border-dark/5">
+        <button class="detail-btn text-dark/50 hover:text-watermelon-dark p-1.5 rounded-lg hover:bg-watermelon/10 transition text-xs" data-id="${order.id}">
+          <i class="fas fa-eye"></i> Detail
+        </button>
+        <a href="https://wa.me/${(order.whatsapp || "").replace(/\D/g, "")}" target="_blank" class="text-dark/50 hover:text-green-500 p-1.5 rounded-lg hover:bg-green-50 transition text-xs">
+          <i class="fab fa-whatsapp"></i> Chat
+        </a>
+        <select class="status-dropdown text-xs flex-1 min-w-[100px]" data-id="${order.id}" data-current="${order.status}">
+          <option value="Menunggu Pembayaran" ${order.status === "Menunggu Pembayaran" ? "selected" : ""}>Menunggu</option>
+          <option value="Sudah Dibayar" ${order.status === "Sudah Dibayar" ? "selected" : ""}>Dibayar</option>
+          <option value="Diproses" ${order.status === "Diproses" ? "selected" : ""}>Diproses</option>
+          <option value="Siap Dikirim" ${order.status === "Siap Dikirim" ? "selected" : ""}>Siap Kirim</option>
+          <option value="Selesai" ${order.status === "Selesai" ? "selected" : ""}>Selesai</option>
+          <option value="Dibatalkan" ${order.status === "Dibatalkan" ? "selected" : ""}>Batal</option>
+        </select>
+        <button class="delete-btn text-dark/50 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition text-xs" data-id="${order.id}" data-nomor="${order.nomorOrder}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join("");
+
+  // Re-attach events for mobile
+  document.querySelectorAll("#mobileCardList .detail-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const order = ordersData.find(o => o.id === id);
+      if (order) openDetail(order);
+    });
+  });
+
+  document.querySelectorAll("#mobileCardList .status-dropdown").forEach(select => {
+    select.addEventListener("change", async (e) => {
+      const id = e.target.dataset.id;
+      const newStatus = e.target.value;
+      await updateOrderStatus(id, newStatus);
+    });
+  });
+
+  document.querySelectorAll("#mobileCardList .delete-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      const nomor = btn.dataset.nomor;
+      if (confirm(`Yakin ingin menghapus pesanan #${nomor}?`)) {
+        deleteOrder(id);
+      }
+    });
+  });
+}
+
+// Update Status
 async function updateOrderStatus(id, status) {
   try {
     await updateDoc(doc(db, "pesanan", id), { status });
-    showToast(`Status berhasil diubah menjadi "${status}"`, "fa-check-circle", "success");
+    showToast(`Status berhasil diubah menjadi "${formatStatusLabel(status)}"`, "fa-check-circle", "success");
   } catch (error) {
     console.error("Gagal update status:", error);
     showToast("Gagal mengubah status", "fa-exclamation-circle", "danger");
   }
 }
 
-// ------------------------------------------------------------
-// HAPUS PESANAN
-// ------------------------------------------------------------
+// Delete Order
 async function deleteOrder(id) {
   try {
     await deleteDoc(doc(db, "pesanan", id));
@@ -394,11 +505,11 @@ async function deleteOrder(id) {
   }
 }
 
-// ------------------------------------------------------------
-// MODAL DETAIL
-// ------------------------------------------------------------
+// Modal Detail
 function openDetail(order) {
-  const items = order.items?.map(i => `<div class="flex justify-between text-sm"><span>${i.nama} x${i.qty}</span><span>${formatRupiah(i.subtotal)}</span></div>`).join("") || "";
+  const items = order.items?.map(i => 
+    `<div class="flex justify-between text-sm"><span>${i.nama} x${i.qty}</span><span>${formatRupiah(i.subtotal)}</span></div>`
+  ).join("") || "";
   detailContent.innerHTML = `
     <div class="space-y-2">
       <div><span class="font-semibold">No. Order:</span> ${order.nomorOrder}</div>
@@ -407,7 +518,7 @@ function openDetail(order) {
       <div><span class="font-semibold">WhatsApp:</span> ${order.whatsapp}</div>
       <div><span class="font-semibold">Alamat:</span> ${order.alamat}</div>
       <div><span class="font-semibold">Catatan:</span> ${order.catatan && order.catatan !== "-" ? order.catatan : "—"}</div>
-      <div><span class="font-semibold">Status:</span> <span class="badge-status ${getStatusBadge(order.status)}">${order.status}</span></div>
+      <div><span class="font-semibold">Status:</span> <span class="badge-status ${getStatusBadge(order.status)}">${formatStatusLabel(order.status)}</span></div>
       <div class="border-t border-dark/10 pt-2 mt-2">
         <div class="font-semibold mb-1">Detail Pesanan:</div>
         ${items}
@@ -434,9 +545,7 @@ detailModal.addEventListener("click", (e) => {
   }
 });
 
-// ------------------------------------------------------------
-// SKELETON SAAT LOADING
-// ------------------------------------------------------------
+// Skeleton
 function renderSkeleton() {
   const skeletonRows = Array.from({ length: 5 }, () => `
     <tr>
@@ -456,3 +565,12 @@ function renderSkeleton() {
 }
 
 renderSkeleton();
+
+statsContainer.innerHTML = Array.from({ length: 6 }, () => `
+  <div class="bg-white rounded-2xl p-4 border border-dark/10 shadow-sm">
+    <div class="skeleton h-4 w-16 mb-2"></div>
+    <div class="skeleton h-8 w-20"></div>
+  </div>
+`).join("");
+
+setInterval(updateLastUpdated, 30000);
