@@ -1,6 +1,5 @@
 // ============================================================
-// Salad Buah Putri — admin.js (Halaman Admin)
-// Firebase SDK v9+ (Modular)
+// admin.js – Halaman Admin dengan Firebase Authentication
 // ============================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
@@ -11,9 +10,15 @@ import {
   orderBy,
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 // ------------------------------------------------------------
-// KONFIGURASI FIREBASE (samakan dengan app.js)
+// KONFIGURASI FIREBASE
 // ------------------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyA2IElw69ToQOkJuXnEusj6t8g_etlM6Wg",
@@ -27,16 +32,27 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // ------------------------------------------------------------
 // ELEMEN DOM
 // ------------------------------------------------------------
+const loginSection = document.getElementById("loginSection");
+const adminContent = document.getElementById("adminContent");
+const loginForm = document.getElementById("loginForm");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
+const logoutBtn = document.getElementById("logoutBtn");
+
 const tableBody = document.getElementById("ordersTableBody");
 const loadingState = document.getElementById("loadingState");
 const emptyState = document.getElementById("emptyState");
 const statTotalOrders = document.getElementById("statTotalOrders");
 const statTotalRevenue = document.getElementById("statTotalRevenue");
 const statLastOrder = document.getElementById("statLastOrder");
+
+let unsubscribeOrders = null;
 
 // ------------------------------------------------------------
 // HELPER
@@ -67,57 +83,117 @@ function formatItems(items) {
 }
 
 // ------------------------------------------------------------
-// LISTENER REAL-TIME
+// LOGIN
 // ------------------------------------------------------------
-const ordersQuery = query(collection(db, "pesanan"), orderBy("createdAt", "desc"));
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginError.classList.add("hidden");
 
-onSnapshot(
-  ordersQuery,
-  (snapshot) => {
-    loadingState.classList.add("hidden");
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
 
-    if (snapshot.empty) {
-      tableBody.innerHTML = "";
-      emptyState.classList.remove("hidden");
-      updateStats([]);
-      return;
-    }
-
-    emptyState.classList.add("hidden");
-
-    const orders = snapshot.docs.map((doc) => doc.data());
-
-    tableBody.innerHTML = orders
-      .map(
-        (order) => `
-      <tr class="hover:bg-cream/60 align-top">
-        <td class="px-4 py-3 whitespace-nowrap font-mono text-xs text-dark/70">${order.nomorOrder || "—"}</td>
-        <td class="px-4 py-3 whitespace-nowrap text-dark/70">${formatTanggal(order.createdAt)}</td>
-        <td class="px-4 py-3 font-semibold whitespace-nowrap">${order.nama || "—"}</td>
-        <td class="px-4 py-3 whitespace-nowrap">
-          <a href="https://wa.me/${(order.whatsapp || "").replace(/\D/g, "")}" target="_blank" class="text-kiwi-dark font-medium hover:underline">
-            ${order.whatsapp || "—"}
-          </a>
-        </td>
-        <td class="px-4 py-3 max-w-[220px]">${order.alamat || "—"}</td>
-        <td class="px-4 py-3 max-w-[260px] text-dark/70">${formatItems(order.items)}</td>
-        <td class="px-4 py-3 max-w-[180px] text-dark/70">${order.catatan && order.catatan !== "-" ? order.catatan : "—"}</td>
-        <td class="px-4 py-3 font-semibold text-watermelon-dark whitespace-nowrap">${formatRupiah(order.totalHarga)}</td>
-      </tr>
-    `
-      )
-      .join("");
-
-    updateStats(orders);
-  },
-  (error) => {
-    console.error("Gagal memuat pesanan:", error);
-    loadingState.textContent = "Gagal memuat data. Periksa koneksi atau aturan Firestore.";
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged akan menangani perpindahan
+  } catch (error) {
+    console.error("Login gagal:", error);
+    loginError.textContent = "Email atau password salah. Coba lagi.";
+    loginError.classList.remove("hidden");
   }
-);
+});
 
 // ------------------------------------------------------------
-// RINGKASAN STATISTIK
+// LOGOUT
+// ------------------------------------------------------------
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+// ------------------------------------------------------------
+// AUTH STATE OBSERVER
+// ------------------------------------------------------------
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Admin login
+    loginSection.classList.add("hidden");
+    adminContent.classList.remove("hidden");
+
+    // Mulai mendengarkan data pesanan jika belum
+    if (!unsubscribeOrders) {
+      startListeningOrders();
+    }
+  } else {
+    // Belum login / logout
+    loginSection.classList.remove("hidden");
+    adminContent.classList.add("hidden");
+
+    // Hentikan listener
+    if (unsubscribeOrders) {
+      unsubscribeOrders();
+      unsubscribeOrders = null;
+    }
+    // Kosongkan tabel & statistik
+    tableBody.innerHTML = "";
+    loadingState.classList.remove("hidden");
+    emptyState.classList.add("hidden");
+    updateStats([]);
+  }
+});
+
+// ------------------------------------------------------------
+// LISTENER PESANAN (hanya berjalan jika user login)
+// ------------------------------------------------------------
+function startListeningOrders() {
+  const ordersQuery = query(collection(db, "pesanan"), orderBy("createdAt", "desc"));
+
+  unsubscribeOrders = onSnapshot(
+    ordersQuery,
+    (snapshot) => {
+      loadingState.classList.add("hidden");
+
+      if (snapshot.empty) {
+        tableBody.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        updateStats([]);
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      const orders = snapshot.docs.map((doc) => doc.data());
+
+      tableBody.innerHTML = orders
+        .map(
+          (order) => `
+          <tr class="hover:bg-cream/60 align-top">
+            <td class="px-4 py-3 whitespace-nowrap font-mono text-xs text-dark/70">${order.nomorOrder || "—"}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-dark/70">${formatTanggal(order.createdAt)}</td>
+            <td class="px-4 py-3 font-semibold whitespace-nowrap">${order.nama || "—"}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <a href="https://wa.me/${(order.whatsapp || "").replace(/\D/g, "")}" target="_blank" class="text-kiwi-dark font-medium hover:underline">
+                ${order.whatsapp || "—"}
+              </a>
+            </td>
+            <td class="px-4 py-3 max-w-[220px]">${order.alamat || "—"}</td>
+            <td class="px-4 py-3 max-w-[260px] text-dark/70">${formatItems(order.items)}</td>
+            <td class="px-4 py-3 max-w-[180px] text-dark/70">${order.catatan && order.catatan !== "-" ? order.catatan : "—"}</td>
+            <td class="px-4 py-3 font-semibold text-watermelon-dark whitespace-nowrap">${formatRupiah(order.totalHarga)}</td>
+          </tr>
+        `
+        )
+        .join("");
+
+      updateStats(orders);
+    },
+    (error) => {
+      console.error("Gagal memuat pesanan:", error);
+      loadingState.textContent = "Gagal memuat data. Periksa koneksi atau aturan Firestore.";
+    }
+  );
+}
+
+// ------------------------------------------------------------
+// UPDATE STATISTIK
 // ------------------------------------------------------------
 function updateStats(orders) {
   const totalOrders = orders.length;
