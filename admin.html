@@ -1,107 +1,129 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin — Salad Buah Putri</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          cream: '#FFF6F3',
-          dark: '#4A2E3C',
-          watermelon: '#FF8FA6',
-          'watermelon-dark': '#E8637F',
-          mango: '#FFCB94',
-          kiwi: '#B497D6',
-          'kiwi-dark': '#8A67B8',
-        },
-        fontFamily: {
-          display: ['Quicksand', 'sans-serif'],
-          body: ['Poppins', 'sans-serif'],
-        },
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Salad Buah Putri</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FFF6F3',
+            dark: '#4A2E3C',
+            watermelon: '#FF8FA6',
+            'watermelon-dark': '#E8637F',
+            mango: '#FFCB94',
+            kiwi: '#B497D6',
+            'kiwi-dark': '#8A67B8',
+          },
+          fontFamily: {
+            display: ['Quicksand', 'sans-serif'],
+            body: ['Poppins', 'sans-serif'],
+          },
+        }
       }
     }
-  }
-</script>
-<style>
-  body { font-family: 'Poppins', sans-serif; }
-  .font-display { font-family: 'Quicksand', sans-serif; }
-</style>
+  </script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+    .font-display { font-family: 'Quicksand', sans-serif; }
+  </style>
 </head>
 <body class="bg-cream text-dark antialiased min-h-screen">
 
-  <header class="sticky top-0 z-10 bg-cream/90 backdrop-blur border-b border-dark/10">
-    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-2xl">🥗</span>
-        <span class="font-display font-600 text-xl tracking-tight">Dashboard Pesanan</span>
-      </div>
-      <div class="flex items-center gap-2 text-sm font-medium text-kiwi-dark">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-kiwi"></span>
-        </span>
-        Live
-      </div>
+  <!-- ========== LOGIN SECTION ========== -->
+  <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl border border-dark/10 shadow-lg p-6 sm:p-8">
+      <h2 class="font-display font-600 text-3xl text-center">🔐 Admin Login</h2>
+      <p class="text-dark/60 text-sm text-center mt-1 mb-6">Masukkan email dan password untuk mengakses dashboard</p>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="loginEmail" class="block text-sm font-semibold mb-1.5">Email</label>
+          <input type="email" id="loginEmail" placeholder="admin@saladbuahputri.com" required
+                 class="w-full px-4 py-3 rounded-xl border border-dark/15 focus:outline-none focus:ring-2 focus:ring-watermelon" />
+        </div>
+        <div>
+          <label for="loginPassword" class="block text-sm font-semibold mb-1.5">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required
+                 class="w-full px-4 py-3 rounded-xl border border-dark/15 focus:outline-none focus:ring-2 focus:ring-watermelon" />
+        </div>
+        <button type="submit" id="loginBtn" class="w-full bg-dark text-cream font-semibold py-3 rounded-full hover:bg-watermelon-dark transition">
+          Login
+        </button>
+        <p id="loginError" class="hidden text-watermelon-dark text-sm font-medium text-center"></p>
+      </form>
     </div>
-  </header>
+  </div>
 
-  <main class="max-w-6xl mx-auto px-5 py-8">
+  <!-- ========== DASHBOARD (hidden by default) ========== -->
+  <div id="adminContent" class="hidden">
+    <header class="sticky top-0 z-10 bg-cream/90 backdrop-blur border-b border-dark/10">
+      <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🥗</span>
+          <span class="font-display font-600 text-xl tracking-tight">Dashboard Pesanan</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-medium text-kiwi-dark flex items-center gap-1">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-kiwi"></span>
+            </span>
+            Live
+          </span>
+          <button id="logoutBtn" class="text-sm font-semibold text-dark/60 hover:text-watermelon-dark">Logout</button>
+        </div>
+      </div>
+    </header>
 
-    <!-- Ringkasan -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white rounded-2xl p-5 border border-dark/10">
-        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Pesanan</p>
-        <p id="statTotalOrders" class="font-display font-700 text-2xl mt-1">0</p>
-      </div>
-      <div class="bg-white rounded-2xl p-5 border border-dark/10">
-        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Omzet</p>
-        <p id="statTotalRevenue" class="font-display font-700 text-2xl mt-1">Rp 0</p>
-      </div>
-      <div class="bg-white rounded-2xl p-5 border border-dark/10 hidden sm:block">
-        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Pesanan Terakhir</p>
-        <p id="statLastOrder" class="font-display font-700 text-2xl mt-1">—</p>
-      </div>
-    </div>
-
-    <!-- Tabel -->
-    <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-          <thead class="bg-dark text-cream">
-            <tr>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">No. Order</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
-              <th class="px-4 py-3 font-semibold">Alamat</th>
-              <th class="px-4 py-3 font-semibold">Pesanan</th>
-              <th class="px-4 py-3 font-semibold">Catatan</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">Total</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody" class="divide-y divide-dark/10">
-            <!-- baris pesanan di-render oleh admin.js -->
-          </tbody>
-        </table>
+    <main class="max-w-6xl mx-auto px-5 py-8">
+      <!-- Ringkasan -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-2xl p-5 border border-dark/10">
+          <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Pesanan</p>
+          <p id="statTotalOrders" class="font-display font-700 text-2xl mt-1">0</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-dark/10">
+          <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Omzet</p>
+          <p id="statTotalRevenue" class="font-display font-700 text-2xl mt-1">Rp 0</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 border border-dark/10 hidden sm:block">
+          <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Pesanan Terakhir</p>
+          <p id="statLastOrder" class="font-display font-700 text-2xl mt-1">—</p>
+        </div>
       </div>
 
-      <div id="loadingState" class="py-16 text-center text-dark/40">
-        Memuat data pesanan...
+      <!-- Tabel -->
+      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-dark text-cream">
+              <tr>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">No. Order</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
+                <th class="px-4 py-3 font-semibold">Alamat</th>
+                <th class="px-4 py-3 font-semibold">Pesanan</th>
+                <th class="px-4 py-3 font-semibold">Catatan</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Total</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-dark/10">
+              <!-- data akan diisi admin.js -->
+            </tbody>
+          </table>
+        </div>
+        <div id="loadingState" class="py-16 text-center text-dark/40">Memuat data pesanan...</div>
+        <div id="emptyState" class="hidden py-16 text-center text-dark/40">Belum ada pesanan masuk.</div>
       </div>
-      <div id="emptyState" class="hidden py-16 text-center text-dark/40">
-        Belum ada pesanan masuk.
-      </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <script type="module" src="admin.js"></script>
 </body>
