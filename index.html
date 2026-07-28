@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Salad Buah Putri — Segar Setiap Gigitan</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind (CDN) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: '#FFF6F3',
+          dark: '#4A2E3C',
+          watermelon: '#FF8FA6',
+          'watermelon-dark': '#E8637F',
+          mango: '#FFCB94',
+          kiwi: '#B497D6',
+          'kiwi-dark': '#8A67B8',
+        },
+        fontFamily: {
+          display: ['Quicksand', 'sans-serif'],
+          body: ['Poppins', 'sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+
+<style>
+  html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+  body { font-family: 'Poppins', sans-serif; }
+  .font-display { font-family: 'Quicksand', sans-serif; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .drawer-hidden { transform: translateX(100%); }
+  .modal-hidden { opacity: 0; pointer-events: none; }
+  .modal-hidden .modal-panel { transform: translateY(16px) scale(0.98); }
+
+  /* tap/click feedback for all interactive elements */
+  button, a, .tap { touch-action: manipulation; transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+  button:active, a:active, .tap:active { transform: scale(0.96); }
+  button:disabled { transform: none !important; opacity: 0.7; cursor: not-allowed; }
+
+  /* accessible focus ring (keyboard only) */
+  :focus-visible { outline: 2px solid #E8637F; outline-offset: 2px; border-radius: 6px; }
+
+  .bg-blob { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: 0.45; z-index: 0; }
+
+  .photo-frame { position: relative; overflow: hidden; background: linear-gradient(135deg, #FFE1E8, #FFF1DB); }
+  .photo-frame img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; opacity: 0; transition: opacity 0.4s ease; }
+  .photo-frame img.loaded { opacity: 1; }
+  .photo-frame .fallback-art { position: absolute; inset: 0; z-index: 0; }
+
+  @keyframes badgePop { 0%{transform:scale(1);} 40%{transform:scale(1.4);} 100%{transform:scale(1);} }
+  .animate-badge-pop { animation: badgePop 0.4s ease; }
+
+  @keyframes floatIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform: translateY(0);} }
+  .animate-float-in { animation: floatIn 0.25s ease; }
+
+  @keyframes successPop { 0%{transform:scale(0.6); opacity:0;} 60%{transform:scale(1.08); opacity:1;} 100%{transform:scale(1);} }
+  .animate-success-pop { animation: successPop 0.45s cubic-bezier(.34,1.56,.64,1); }
+
+  .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.75rem); }
+
+  /* toast notifications */
+  #toastContainer { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%); z-index: 80; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; padding: 0 1rem; pointer-events: none; }
+  .toast-item { background: #4A2E3C; color: #FFF6F3; font-size: 0.875rem; font-weight: 500; padding: 10px 18px; border-radius: 9999px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); opacity: 0; transform: translateY(10px); transition: opacity 0.25s ease, transform 0.25s ease; max-width: 90vw; text-align: center; }
+  .toast-item.toast-show { opacity: 1; transform: translateY(0); }
+
+  /* size option card */
+  .size-card { position: relative; }
+  .size-card .popular-tag { position: absolute; top: -8px; right: -6px; }
+</style>
+</head>
+<body class="bg-cream text-dark antialiased pb-24 lg:pb-0">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="sticky top-0 z-30 bg-cream/80 backdrop-blur-md border-b border-dark/10">
+    <div class="max-w-5xl mx-auto px-5 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🥗</span>
+        <span class="font-display font-600 text-lg tracking-tight">Salad Buah Putri</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="https://instagram.com/saladputry" target="_blank" rel="noopener" class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-dark/60 hover:text-watermelon-dark">
+          <span>📸</span> @saladputry
+        </a>
+        <button id="openCartBtn" class="relative flex items-center gap-2 bg-dark text-cream px-4 py-2.5 rounded-full font-semibold text-sm shadow-sm hover:shadow-md hover:bg-watermelon-dark">
+          <span>🧺 Keranjang</span>
+          <span id="cartBadge" class="hidden absolute -top-2 -right-2 bg-watermelon text-white text-xs font-bold w-5 h-5 rounded-full items-center justify-center">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO (compact) ===================== -->
+  <section class="relative overflow-hidden pt-8 pb-6 px-5">
+    <div class="bg-blob w-64 h-64 bg-watermelon/40 -top-16 -left-16"></div>
+    <div class="bg-blob w-56 h-56 bg-kiwi/25 top-0 right-0"></div>
+
+    <div class="max-w-5xl mx-auto relative z-10 grid md:grid-cols-2 gap-6 items-center">
+      <div class="text-center md:text-left">
+        <div class="flex flex-wrap justify-center md:justify-start gap-1.5 mb-3">
+          <span class="inline-flex items-center gap-1 bg-kiwi/15 text-kiwi-dark font-semibold text-[11px] px-2.5 py-1 rounded-full">🌿 Fresh Today</span>
+          <span class="inline-flex items-center gap-1 bg-watermelon/15 text-watermelon-dark font-semibold text-[11px] px-2.5 py-1 rounded-full">🔥 Best Seller</span>
+          <span class="inline-flex items-center gap-1 bg-mango/25 text-dark/70 font-semibold text-[11px] px-2.5 py-1 rounded-full">⏱️ Dibuat setelah dipesan</span>
+        </div>
+
+        <h1 class="font-display font-700 text-3xl sm:text-4xl leading-tight">
+          Semangkuk buah segar, <span class="text-watermelon-dark">langsung</span> ke depan pintumu.
+        </h1>
+        <p class="mt-3 text-dark/70 text-sm sm:text-base max-w-lg mx-auto md:mx-0">
+          Tanpa jelly, isi buah bisa request. Checkout satu menit, kirim bukti transfer langsung lewat WhatsApp.
+        </p>
+
+        <!-- social proof -->
+        <div class="mt-4 flex items-center justify-center md:justify-start gap-4 text-sm">
+          <span class="flex items-center gap-1 font-semibold">
+            <span class="text-mango text-base">★★★★★</span>
+            <span id="ratingValue">4.9</span>
+          </span>
+          <span class="text-dark/30">•</span>
+          <span id="reviewCountText" class="text-dark/60">128 ulasan</span>
+          <span class="text-dark/30">•</span>
+          <span id="orderCountText" class="text-dark/60">500+ pesanan</span>
+        </div>
+
+        <div class="mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3">
+          <a href="#produk" class="bg-dark text-cream font-semibold px-6 py-3 rounded-full text-sm shadow-md hover:shadow-lg hover:bg-watermelon-dark">
+            Pesan Sekarang — mulai Rp10.000
+          </a>
+        </div>
+      </div>
+
+      <!-- Foto/ilustrasi hero. Taruh foto asli di images/hero-salad.jpg untuk menggantikan ilustrasi. -->
+      <div class="photo-frame rounded-[2rem] aspect-[4/3] md:aspect-square shadow-xl">
+        <div class="fallback-art">
+          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <defs>
+              <radialGradient id="bowlBody" cx="50%" cy="30%" r="75%">
+                <stop offset="0%" stop-color="#F3E8FB"/>
+                <stop offset="100%" stop-color="#D8C2EE"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="200" cy="150" rx="150" ry="150" fill="#FFEFE3" opacity="0.6"/>
+            <path d="M70 220 Q200 300 330 220 L310 300 Q200 340 90 300 Z" fill="url(#bowlBody)"/>
+            <ellipse cx="200" cy="222" rx="130" ry="26" fill="#EADAF7"/>
+            <circle cx="150" cy="195" r="30" fill="#FF8FA6"/>
+            <circle cx="140" cy="185" r="9" fill="#FFC3D0" opacity="0.7"/>
+            <circle cx="215" cy="180" r="26" fill="#FFCB94"/>
+            <circle cx="207" cy="171" r="8" fill="#FFE3C2" opacity="0.7"/>
+            <circle cx="255" cy="205" r="22" fill="#7CB342"/>
+            <circle cx="180" cy="215" r="20" fill="#8A67B8"/>
+            <circle cx="120" cy="220" r="16" fill="#8A67B8"/>
+            <circle cx="150" cy="235" r="14" fill="#8A67B8"/>
+            <g>
+              <path d="M255 165 a18 18 0 1 1 0.1 0 Z" fill="#FF5C77"/>
+              <circle cx="248" cy="160" r="1.6" fill="#FFE9D6"/>
+              <circle cx="258" cy="158" r="1.6" fill="#FFE9D6"/>
+              <circle cx="253" cy="168" r="1.6" fill="#FFE9D6"/>
+              <path d="M255 147 q4 -6 9 -3" stroke="#5D8A2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+            <ellipse cx="200" cy="150" rx="46" ry="46" fill="#FFF7F3" stroke="#FFD9E3" stroke-width="3"/>
+            <g stroke="#FF8FA6" stroke-width="3">
+              <line x1="200" y1="112" x2="200" y2="188"/>
+              <line x1="162" y1="150" x2="238" y2="150"/>
+              <line x1="173" y1="123" x2="227" y2="177"/>
+              <line x1="227" y1="123" x2="173" y2="177"/>
+            </g>
+            <circle cx="200" cy="150" r="46" fill="none" stroke="#FF5C77" stroke-width="4"/>
+          </svg>
+        </div>
+        <img src="images/hero-salad.png" alt="Salad Buah Putri" onload="this.classList.add('loaded')" onerror="this.remove()" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRODUK ===================== -->
+  <main id="produk" class="max-w-5xl mx-auto px-5 pb-20 scroll-mt-16">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display font-600 text-2xl">Pesan Salad Buah</h2>
+      <span class="hidden sm:inline-block bg-white border border-dark/10 text-xs font-semibold px-3 py-1.5 rounded-full text-dark/60">Mulai dari Rp10.000</span>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-dark/10 p-5 sm:p-7 shadow-sm grid md:grid-cols-2 gap-8">
+
+      <!-- Info produk -->
+      <div>
+        <!-- Taruh foto asli di images/produk-salad.jpg untuk menggantikan ilustrasi -->
+        <div class="photo-frame rounded-2xl w-full aspect-[4/3] mb-4 shadow-md">
+          <div class="fallback-art flex items-center justify-center">
+            <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" class="w-2/3 h-2/3">
+              <ellipse cx="100" cy="95" rx="85" ry="30" fill="#EADAF7"/>
+              <path d="M20 90 Q100 140 180 90 L172 108 Q100 145 28 108 Z" fill="#D8C2EE"/>
+              <circle cx="65" cy="80" r="18" fill="#FF8FA6"/>
+              <circle cx="105" cy="70" r="15" fill="#FFCB94"/>
+              <circle cx="140" cy="82" r="13" fill="#7CB342"/>
+              <circle cx="85" cy="92" r="12" fill="#8A67B8"/>
+              <circle cx="55" cy="95" r="9" fill="#8A67B8"/>
+            </svg>
+          </div>
+          <img src="images/produk-salad.png" alt="Salad Buah Segar" onload="this.classList.add('loaded')" onerror="this.remove()" />
+        </div>
+
+        <h3 class="font-display font-600 text-xl">Salad Buah Segar</h3>
+        <p class="text-dark/60 text-sm mt-1">Tanpa jelly. Isi buah bisa request sesuai selera.</p>
+
+        <div class="mt-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Pilihan Buah</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Buah naga</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Semangka</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Melon</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Apel</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Pear</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Pepaya</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Mangga</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Anggur</span>
+            <span class="bg-cream border border-dark/10 text-xs px-2.5 py-1 rounded-full">Strawberry</span>
+          </div>
+          <p class="text-xs text-dark/40 mt-2">💡 Mau komposisi buah tertentu? Tulis di catatan saat checkout.</p>
+        </div>
+      </div>
+
+      <!-- Pilihan pesanan -->
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Pilih Ukuran</p>
+        <div id="sizeOptions" class="grid grid-cols-2 gap-2 mb-2">
+          <!-- size buttons injected by app.js -->
+        </div>
+        <p id="upsellTip" class="text-xs text-kiwi-dark bg-kiwi/10 rounded-lg px-3 py-2 mb-4 hidden"></p>
+
+        <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Pilih Topping</p>
+        <div id="toppingOptions" class="flex flex-wrap gap-2 mb-2">
+          <!-- topping buttons injected by app.js -->
+        </div>
+        <p id="crossSellTip" class="text-xs text-watermelon-dark bg-watermelon/10 rounded-lg px-3 py-2 mb-4 hidden"></p>
+
+        <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-2">Jumlah</p>
+        <div class="flex items-center gap-3 mb-5">
+          <button id="productQtyMinus" type="button" aria-label="Kurangi jumlah" class="w-11 h-11 rounded-full border border-dark/20 hover:bg-dark/5 hover:border-dark/30 flex items-center justify-center text-lg">−</button>
+          <span id="productQtyValue" class="w-6 text-center font-semibold">1</span>
+          <button id="productQtyPlus" type="button" aria-label="Tambah jumlah" class="w-11 h-11 rounded-full border border-dark/20 hover:bg-dark/5 hover:border-dark/30 flex items-center justify-center text-lg">+</button>
+        </div>
+
+        <!-- Ringkasan real-time -->
+        <div class="bg-cream rounded-2xl p-4 mb-5 border border-dark/10">
+          <p class="text-xs font-semibold uppercase tracking-wide text-dark/40 mb-1.5">Pesanan Kamu</p>
+          <div id="liveOrderSummary" class="text-sm text-dark/80 space-y-0.5"></div>
+        </div>
+
+        <button id="addToCartBtn" class="w-full bg-dark text-cream font-semibold py-3.5 rounded-full shadow-md hover:shadow-lg hover:bg-watermelon-dark flex items-center justify-center gap-2">
+          <span>+ Tambah ke Keranjang</span>
+          <span id="addToCartPrice" class="font-display"></span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== SOCIAL PROOF / REVIEW ===================== -->
+  <section class="max-w-5xl mx-auto px-5 pb-16">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display font-600 text-2xl">Kata Pelanggan</h2>
+      <span class="flex items-center gap-1 text-sm font-semibold">
+        <span class="text-mango">★★★★★</span> 4.9/5
+      </span>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl border border-dark/10 p-5">
+        <div class="text-mango text-sm mb-2">★★★★★</div>
+        <p class="text-sm text-dark/70">"Buahnya segar banget, potongannya besar-besar. Langganan tiap minggu!"</p>
+        <p class="text-xs text-dark/40 mt-3 font-semibold">— Nama Pelanggan</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-dark/10 p-5">
+        <div class="text-mango text-sm mb-2">★★★★★</div>
+        <p class="text-sm text-dark/70">"Pengiriman cepat, packing rapi, topping keju-nya banyak. Recommended!"</p>
+        <p class="text-xs text-dark/40 mt-3 font-semibold">— Nama Pelanggan</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-dark/10 p-5">
+        <div class="text-mango text-sm mb-2">★★★★★</div>
+        <p class="text-sm text-dark/70">"Bisa request tanpa pepaya, dilayani dengan ramah. Rasanya juga enak!"</p>
+        <p class="text-xs text-dark/40 mt-3 font-semibold">— Nama Pelanggan</p>
+      </div>
+    </div>
+    <p class="text-xs text-dark/30 mt-3 text-center">💡 Ganti ulasan di atas dengan review asli dari pelanggan kamu (screenshot chat WA / DM Instagram).</p>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="border-t border-dark/10 bg-white">
+    <div class="max-w-5xl mx-auto px-5 py-10 grid sm:grid-cols-3 gap-8 text-sm">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xl">🥗</span>
+          <span class="font-display font-600 text-lg">Salad Buah Putri</span>
+        </div>
+        <p class="text-dark/60">Salad buah segar tanpa jelly, dipotong & dikemas setelah kamu pesan.</p>
+      </div>
+      <div>
+        <p class="font-semibold mb-2">Kontak</p>
+        <ul class="space-y-1.5 text-dark/60">
+          <li><a href="https://wa.me/6281915779457" target="_blank" rel="noopener" class="hover:text-watermelon-dark">💬 WhatsApp: 0819-1577-9457</a></li>
+          <li><a href="https://instagram.com/saladputry" target="_blank" rel="noopener" class="hover:text-watermelon-dark">📸 @saladputry</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold mb-2">Info Toko</p>
+        <ul class="space-y-1.5 text-dark/60">
+          <li id="footerHours">🕒 Jam Operasional: 08.00 – 20.00 WIB</li>
+          <li id="footerLocation">📍 Yogyakarta, Indonesia</li>
+          <li><a id="footerMapsLink" href="https://maps.google.com" target="_blank" rel="noopener" class="hover:text-watermelon-dark underline">Buka di Google Maps</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-dark/10 py-4 text-center text-xs text-dark/40">
+      © <span id="footerYear"></span> Salad Buah Putri. Semua hak dilindungi.
+    </div>
+  </footer>
+
+  <!-- ===================== CART DRAWER ===================== -->
+  <div id="cartOverlay" class="fixed inset-0 bg-dark/40 z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  <aside id="cartDrawer" role="dialog" aria-modal="true" aria-label="Keranjang belanja" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-cream z-50 shadow-2xl transition-transform duration-300 drawer-hidden flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-dark/10">
+      <h3 class="font-display font-600 text-xl">Keranjang Kamu</h3>
+      <button id="closeCartBtn" aria-label="Tutup keranjang" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">✕</button>
+    </div>
+
+    <div id="cartItemsWrap" class="flex-1 overflow-y-auto scrollbar-none px-5 py-4 space-y-4">
+      <!-- cart items injected here -->
+    </div>
+
+    <div id="cartEmptyState" class="flex-1 flex flex-col items-center justify-center text-center px-8 text-dark/50">
+      <span class="text-4xl mb-2">🍇</span>
+      <p>Keranjangmu masih kosong. Yuk pilih salad favoritmu!</p>
+    </div>
+
+    <div id="cartFooter" class="border-t border-dark/10 px-5 py-5 space-y-3 hidden">
+      <div class="flex justify-between items-center font-semibold text-lg">
+        <span>Total</span>
+        <span id="cartTotal" class="text-watermelon-dark">Rp 0</span>
+      </div>
+      <button id="checkoutBtn" class="w-full bg-watermelon text-white font-semibold py-3.5 rounded-full shadow-md hover:shadow-lg hover:bg-watermelon-dark">
+        Lanjut ke Checkout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== CHECKOUT MODAL ===================== -->
+  <div id="checkoutModal" role="dialog" aria-modal="true" aria-label="Form checkout" class="fixed inset-0 z-50 modal-hidden transition-opacity duration-300 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-dark/50" id="checkoutOverlay"></div>
+    <div class="modal-panel relative bg-cream w-full max-w-lg rounded-3xl shadow-2xl p-5 sm:p-7 max-h-[88vh] overflow-y-auto scrollbar-none transition-transform duration-300">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-600 text-xl">Data Pengiriman</h3>
+        <button id="closeCheckoutBtn" aria-label="Tutup" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">✕</button>
+      </div>
+
+      <!-- step indicator -->
+      <div class="flex items-center gap-1.5 mb-5 text-[11px] font-semibold text-dark/40">
+        <span class="flex items-center gap-1 text-kiwi-dark"><span class="w-4 h-4 rounded-full bg-kiwi-dark text-white flex items-center justify-center text-[9px]">✓</span> Keranjang</span>
+        <span class="flex-1 h-px bg-dark/10 mx-1"></span>
+        <span class="flex items-center gap-1 text-watermelon-dark"><span class="w-4 h-4 rounded-full bg-watermelon-dark text-white flex items-center justify-center text-[9px]">2</span> Data</span>
+        <span class="flex-1 h-px bg-dark/10 mx-1"></span>
+        <span class="flex items-center gap-1"><span class="w-4 h-4 rounded-full bg-dark/10 flex items-center justify-center text-[9px]">3</span> Konfirmasi</span>
+      </div>
+
+      <div id="checkoutSummary" class="bg-white rounded-2xl p-4 mb-5 text-sm space-y-1.5 border border-dark/10"></div>
+
+      <form id="checkoutForm" class="space-y-3.5" novalidate>
+        <div>
+          <label for="inputNama" class="block text-sm font-semibold mb-1.5">Nama Lengkap</label>
+          <input id="inputNama" type="text" placeholder="Contoh: Putri Amelia"
+            class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon" />
+          <p class="field-error hidden text-xs text-watermelon-dark mt-1"></p>
+        </div>
+        <div>
+          <label for="inputWa" class="block text-sm font-semibold mb-1.5">Nomor WhatsApp</label>
+          <input id="inputWa" type="tel" inputmode="numeric" placeholder="Contoh: 081234567890"
+            class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon" />
+          <p class="field-error hidden text-xs text-watermelon-dark mt-1"></p>
+        </div>
+        <div>
+          <label for="inputAlamat" class="block text-sm font-semibold mb-1.5">Alamat Lengkap</label>
+          <textarea id="inputAlamat" rows="3" placeholder="Nama jalan, nomor rumah, RT/RW, patokan..."
+            class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon resize-none"></textarea>
+          <p class="field-error hidden text-xs text-watermelon-dark mt-1"></p>
+        </div>
+        <div>
+          <label for="inputCatatan" class="block text-sm font-semibold mb-1.5">Catatan / Request Buah <span class="text-dark/40 font-normal">(opsional)</span></label>
+          <textarea id="inputCatatan" rows="2" placeholder="Contoh: tanpa pepaya, extra anggur, dll."
+            class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon resize-none"></textarea>
+        </div>
+
+        <p id="checkoutError" class="hidden text-watermelon-dark text-sm font-medium"></p>
+
+        <button id="submitOrderBtn" type="submit" class="w-full bg-dark text-cream font-semibold py-3.5 rounded-full shadow-md hover:shadow-lg hover:bg-watermelon-dark flex items-center justify-center gap-2">
+          <svg id="submitSpinner" class="hidden animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span id="submitOrderText">Buat Pesanan</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== SUCCESS MODAL ===================== -->
+  <div id="successModal" role="dialog" aria-modal="true" aria-label="Pesanan berhasil" class="fixed inset-0 z-[60] modal-hidden transition-opacity duration-300 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-dark/60"></div>
+    <div class="modal-panel relative bg-cream w-full max-w-lg rounded-3xl shadow-2xl p-5 sm:p-7 max-h-[90vh] overflow-y-auto scrollbar-none transition-transform duration-300 text-center">
+      <span class="text-5xl inline-block animate-success-pop">🎉</span>
+      <h3 class="font-display font-700 text-2xl mt-3">Pesanan Berhasil Dibuat!</h3>
+
+      <div class="flex items-center justify-center gap-2 mt-2 text-xs">
+        <span id="orderNumberBadge" class="bg-dark text-cream font-semibold px-3 py-1 rounded-full"></span>
+        <span id="orderStatusBadge" class="bg-mango/30 text-dark/70 font-semibold px-3 py-1 rounded-full">Menunggu Pembayaran</span>
+      </div>
+
+      <div id="successSummary" class="bg-white rounded-2xl p-4 mt-4 text-sm text-left space-y-1.5 border border-dark/10"></div>
+
+      <div class="grid grid-cols-2 gap-2 mt-3 text-left">
+        <div class="bg-white rounded-xl p-3 border border-dark/10">
+          <p class="text-[10px] font-semibold uppercase text-dark/40">Estimasi Diproses</p>
+          <p id="successEstimasi" class="text-xs font-medium mt-0.5"></p>
+        </div>
+        <div class="bg-white rounded-xl p-3 border border-dark/10">
+          <p class="text-[10px] font-semibold uppercase text-dark/40">Jam Operasional</p>
+          <p id="successJamOperasional" class="text-xs font-medium mt-0.5"></p>
+        </div>
+      </div>
+
+      <div class="bg-kiwi/10 border border-kiwi/30 rounded-2xl p-4 mt-4 text-left">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-kiwi-dark uppercase tracking-wide">Transfer ke rekening</p>
+          <button id="copyRekeningBtn" type="button" class="text-xs font-semibold bg-white border border-kiwi/40 px-2.5 py-1 rounded-full hover:bg-kiwi/10">Copy</button>
+        </div>
+        <p id="rekeningInfo" class="font-display font-600 text-lg mt-0.5"></p>
+
+        <div class="flex items-center justify-between mt-3 pt-3 border-t border-kiwi/20">
+          <div>
+            <p class="text-xs font-semibold text-kiwi-dark uppercase tracking-wide">Total Transfer</p>
+            <p id="successTotalTransfer" class="font-display font-700 text-xl"></p>
+          </div>
+          <button id="copyTotalBtn" type="button" class="text-xs font-semibold bg-white border border-kiwi/40 px-2.5 py-1 rounded-full hover:bg-kiwi/10 self-end">Copy</button>
+        </div>
+      </div>
+
+      <a id="waButton" target="_blank" rel="noopener"
+        class="mt-6 w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white font-semibold py-4 rounded-full shadow-md hover:shadow-lg hover:brightness-95">
+        <span>💬 Kirim Bukti Transfer via WhatsApp</span>
+      </a>
+
+      <button id="closeSuccessBtn" class="mt-3 w-full text-dark/50 font-medium py-2 text-sm hover:text-dark">
+        Tutup
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MOBILE FLOATING CART BAR ===================== -->
+  <div id="mobileCartBar" class="hidden lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-dark text-cream px-4 pt-3 pb-safe shadow-[0_-8px_24px_rgba(0,0,0,0.15)]">
+    <button id="mobileCartBarBtn" type="button" class="w-full flex items-center justify-between gap-3">
+      <span class="flex items-center gap-2 text-sm font-medium">
+        <span id="mobileCartCount" class="bg-watermelon text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+        Lihat Keranjang
+      </span>
+      <span id="mobileCartTotal" class="font-display font-700 text-lg">Rp 0</span>
+    </button>
+  </div>
+
+  <!-- ===================== DESKTOP STICKY CART ===================== -->
+  <div id="desktopCartBar" class="hidden fixed bottom-6 right-6 z-40 bg-white/90 backdrop-blur-md border border-dark/10 shadow-xl rounded-2xl p-4 w-72">
+    <div class="flex items-center justify-between mb-2">
+      <span class="flex items-center gap-2 text-sm font-medium text-dark/70">
+        <span id="desktopCartCount" class="bg-watermelon text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+        item di keranjang
+      </span>
+      <span id="desktopCartTotal" class="font-display font-700 text-base text-watermelon-dark">Rp 0</span>
+    </div>
+    <button id="desktopCartBarBtn" type="button" class="w-full bg-dark text-cream font-semibold py-2.5 rounded-full text-sm hover:bg-watermelon-dark">
+      Lihat Keranjang
+    </button>
+  </div>
+
+  <!-- toast notifications -->
+  <div id="toastContainer"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
