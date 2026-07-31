@@ -1,236 +1,305 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Admin — Salad Buah Putri</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
-
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Font Awesome (wajib untuk ikon di kode admin baru) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          cream: '#FFF6F3',
-          dark: '#4A2E3C',
-          watermelon: '#FF8FA6',
-          'watermelon-dark': '#E8637F',
-          mango: '#FFCB94',
-          kiwi: '#B497D6',
-          'kiwi-dark': '#8A67B8',
-        },
-        fontFamily: {
-          display: ['Quicksand', 'sans-serif'],
-          body: ['Poppins', 'sans-serif'],
-        },
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Salad Buah Putri</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FFF6F3',
+            dark: '#4A2E3C',
+            watermelon: '#FF8FA6',
+            'watermelon-dark': '#E8637F',
+            mango: '#FFCB94',
+            kiwi: '#B497D6',
+            'kiwi-dark': '#8A67B8',
+          },
+          fontFamily: {
+            display: ['Quicksand', 'sans-serif'],
+            body: ['Poppins', 'sans-serif'],
+          },
+        }
       }
     }
-  }
-</script>
+  </script>
 
-<style>
-  body { font-family: 'Poppins', sans-serif; background: #FFF6F3; color: #4A2E3C; }
-  .font-display { font-family: 'Quicksand', sans-serif; }
-  
-  /* Scrollbar */
-  .scrollbar-none::-webkit-scrollbar { display: none; }
-  
-  /* Skeleton loading */
-  .skeleton { background: #e5e7eb; border-radius: 9999px; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  /* Toast Notifications */
-  #toastContainer {
-    position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
-    z-index: 999; display: flex; flex-direction: column; gap: 8px; align-items: center;
-    width: 100%; padding: 0 1rem; pointer-events: none;
-  }
-  .toast-item {
-    background: #4A2E3C; color: #FFF6F3; font-size: 0.875rem; font-weight: 500;
-    padding: 10px 18px; border-radius: 9999px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    display: flex; align-items: center; gap: 0.5rem;
-    opacity: 1; transform: translateX(0); transition: opacity 0.3s ease, transform 0.3s ease;
-    pointer-events: auto;
-  }
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #FFF6F3; }
+    .font-display { font-family: 'Quicksand', sans-serif; }
 
-  /* Status Badges */
-  .badge-status {
-    display: inline-flex; align-items: center; gap: 0.25rem;
-    padding: 0.25rem 0.75rem; border-radius: 9999px;
-    font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  }
-  .badge-status:hover { transform: scale(0.95); }
-  
-  .badge-menunggu { background: #FEF3C7; color: #B45309; }
-  .badge-dibayar { background: #DBEAFE; color: #1D4ED8; }
-  .badge-diproses { background: #E0E7FF; color: #4338CA; }
-  .badge-siap { background: #D1FAE5; color: #047857; }
-  .badge-selesai { background: #DCFCE7; color: #166534; }
-  .badge-batal { background: #FEE2E2; color: #991B1B; }
+    /* Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0ece9 25%, #e6e0db 50%, #f0ece9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
 
-  /* Tabel */
-  .table-row-zebra:nth-child(even) { background: #FAF5F3; }
-  .truncate-detail {
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
-  }
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 380px;
+      width: 100%;
+    }
+    .toast-item {
+      background: #4A2E3C;
+      color: #FFF6F3;
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+    .toast-item i { font-size: 1.1rem; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
-  /* Modal Detail */
-  #detailModal {
-    display: none; align-items: center; justify-content: center;
-    backdrop-filter: blur(4px); z-index: 100;
-  }
-  #detailModal:not(.hidden) { display: flex; }
+    /* Badge Status */
+    .badge-status {
+      padding: 0.2rem 0.7rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: capitalize;
+      display: inline-block;
+      letter-spacing: 0.3px;
+    }
+    .badge-menunggu { background: #FDE68A; color: #92400E; }
+    .badge-dibayar { background: #93C5FD; color: #1E3A8A; }
+    .badge-diproses { background: #D8B4FE; color: #5B21B6; }
+    .badge-siap { background: #99F6E4; color: #115E59; }
+    .badge-selesai { background: #86EFAC; color: #14532D; }
+    .badge-batal { background: #FCA5A5; color: #7F1D1D; }
 
-  /* Filter & Search */
-  .filter-btn { transition: all 0.2s; }
-  .filter-btn.active { background: #4A2E3C; color: #FFF6F3; }
+    /* Tabel */
+    .table-row-zebra:nth-child(even) {
+      background: #faf7f5;
+    }
+    .table-row-zebra:hover {
+      background: #f1ebe7 !important;
+    }
 
-  /* Responsive table wrapper */
-  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-</style>
+    /* Truncate */
+    .truncate-detail {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-height: 3em;
+      line-height: 1.5em;
+    }
+
+    /* Stat Card */
+    .stat-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    /* Filter Buttons */
+    .filter-btn {
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: transparent;
+      border: 1px solid #e5e0db;
+      color: #4A2E3C;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .filter-btn:hover {
+      background: #f1ebe7;
+    }
+    .filter-btn.active {
+      background: #4A2E3C;
+      color: #FFF6F3;
+      border-color: #4A2E3C;
+    }
+
+    /* Status Dropdown */
+    .status-dropdown {
+      background: white;
+      border: 1px solid #e5e0db;
+      border-radius: 8px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #4A2E3C;
+      cursor: pointer;
+      outline: none;
+    }
+    .status-dropdown:focus {
+      border-color: #E8637F;
+      ring: 2px solid #FF8FA6;
+    }
+
+    /* Responsif */
+    @media (max-width: 640px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .table-wrap { overflow-x: auto; }
+      .action-buttons { flex-wrap: wrap; gap: 0.25rem; }
+      .toast-container { left: 1rem; right: 1rem; bottom: 1rem; max-width: 100%; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- =============== LOGIN SECTION =============== -->
-  <div id="loginSection" class="min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-md border border-dark/10">
-      <div class="text-center mb-6">
-        <span class="text-4xl">🥗</span>
-        <h2 class="font-display font-700 text-2xl mt-2">Admin Salad Buah Putri</h2>
-        <p class="text-dark/50 text-sm mt-1">Silakan masuk untuk mengelola pesanan</p>
-      </div>
+  <!-- ========== LOGIN SECTION ========== -->
+  <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
+    <div class="max-w-md w-full bg-white rounded-3xl border border-dark/10 shadow-lg p-6 sm:p-8">
+      <h2 class="font-display font-600 text-3xl text-center">🔐 Admin Login</h2>
+      <p class="text-dark/60 text-sm text-center mt-1 mb-6">Masukkan email dan password untuk mengakses dashboard</p>
       <form id="loginForm" class="space-y-4">
         <div>
           <label for="loginEmail" class="block text-sm font-semibold mb-1.5">Email</label>
-          <input id="loginEmail" type="email" placeholder="admin@saladbuahputri.com" 
-                 class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-cream/50 focus:outline-none focus:ring-2 focus:ring-watermelon" required />
+          <input type="email" id="loginEmail" placeholder="admin@saladbuahputri.com" required
+                 class="w-full px-4 py-3 rounded-xl border border-dark/15 focus:outline-none focus:ring-2 focus:ring-watermelon" />
         </div>
         <div>
           <label for="loginPassword" class="block text-sm font-semibold mb-1.5">Password</label>
-          <input id="loginPassword" type="password" placeholder="********" 
-                 class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-cream/50 focus:outline-none focus:ring-2 focus:ring-watermelon" required />
+          <input type="password" id="loginPassword" placeholder="••••••••" required
+                 class="w-full px-4 py-3 rounded-xl border border-dark/15 focus:outline-none focus:ring-2 focus:ring-watermelon" />
         </div>
-        <p id="loginError" class="hidden text-watermelon-dark text-sm font-medium text-center"></p>
-        <button type="submit" class="w-full bg-dark text-cream font-semibold py-3 rounded-full shadow-md hover:shadow-lg hover:bg-watermelon-dark transition">
-          <i class="fas fa-lock mr-2"></i> Masuk
+        <button type="submit" id="loginBtn" class="w-full bg-dark text-cream font-semibold py-3 rounded-full hover:bg-watermelon-dark transition">
+          Login
         </button>
+        <p id="loginError" class="hidden text-watermelon-dark text-sm font-medium text-center"></p>
       </form>
     </div>
   </div>
 
-  <!-- =============== ADMIN CONTENT (Tersembunyi sampai login) =============== -->
-  <div id="adminContent" class="hidden min-h-screen pb-12">
-    
-    <!-- Header Admin -->
-    <header class="sticky top-0 z-20 bg-cream/90 backdrop-blur border-b border-dark/10">
-      <div class="max-w-6xl mx-auto px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+  <!-- ========== DASHBOARD ========== -->
+  <div id="adminContent" class="hidden">
+    <!-- Header -->
+    <header class="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-dark/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="text-2xl">🥗</span>
-          <span class="font-display font-600 text-xl tracking-tight">Dashboard Pesanan</span>
+          <span class="font-display font-600 text-xl tracking-tight">Dashboard</span>
         </div>
-        <div class="flex items-center gap-4">
-          <span id="greetingText" class="text-sm font-medium hidden sm:inline">Halo, Admin 👋</span>
-          <div class="flex items-center gap-2 text-xs text-kiwi-dark bg-kiwi/10 px-3 py-1 rounded-full">
-            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-kiwi"></span></span>
-            <span id="lastUpdatedText">Memuat...</span>
-          </div>
-          <button id="logoutBtn" class="text-sm font-medium text-dark/50 hover:text-red-500 transition">
-            <i class="fas fa-sign-out-alt"></i> Keluar
-          </button>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-medium text-kiwi-dark flex items-center gap-1">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-kiwi"></span>
+            </span>
+            Live
+          </span>
+          <button id="logoutBtn" class="text-sm font-semibold text-dark/60 hover:text-watermelon-dark transition">Logout</button>
         </div>
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-5 py-6 space-y-6">
-      
-      <!-- Stats Cards -->
-      <div id="statsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+    <!-- Main -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-      <!-- Filter & Search -->
-      <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div class="flex flex-wrap gap-2">
-          <button class="filter-btn active bg-dark text-cream px-4 py-2 rounded-full text-xs font-semibold shadow-sm" data-filter="semua">Semua</button>
-          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="hari-ini">Hari Ini</button>
-          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="minggu-ini">Minggu Ini</button>
-          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="belum-proses">Belum Proses</button>
-          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="selesai">Selesai</button>
+      <!-- ===== STATISTIK ===== -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 stat-grid" id="statsContainer">
+        <!-- akan diisi JS -->
+      </div>
+
+      <!-- ===== SEARCH & FILTER ===== -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div class="relative flex-1 max-w-sm">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-dark/30 text-sm"></i>
+          <input type="text" id="searchInput" placeholder="Cari No. Order, Nama, atau WhatsApp..."
+                 class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-dark/10 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon text-sm" />
         </div>
-        <div class="relative w-full sm:w-64">
-          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-dark/30"></i>
-          <input id="searchInput" type="text" placeholder="Cari nomor order / nama..." 
-                 class="w-full pl-9 pr-4 py-2 rounded-full border border-dark/10 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon text-sm" />
+        <div class="flex flex-wrap items-center gap-2">
+          <button class="filter-btn active" data-filter="semua">Semua</button>
+          <button class="filter-btn" data-filter="hari-ini">Hari Ini</button>
+          <button class="filter-btn" data-filter="minggu-ini">Minggu Ini</button>
+          <button class="filter-btn" data-filter="belum-proses">Belum Diproses</button>
+          <button class="filter-btn" data-filter="selesai">Selesai</button>
         </div>
       </div>
 
-      <!-- Result Count -->
-      <p id="resultCount" class="hidden text-xs text-dark/40 font-semibold"></p>
-
-      <!-- Desktop Table -->
-      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden hidden md:block">
-        <div class="table-wrapper">
-          <table class="w-full text-sm text-left">
+      <!-- ===== TABEL ===== -->
+      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto table-wrap">
+          <table class="w-full text-sm">
             <thead class="bg-dark text-cream">
               <tr>
-                <th class="px-4 py-3 font-semibold whitespace-nowrap">No. Order</th>
-                <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal</th>
-                <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama</th>
-                <th class="px-4 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
-                <th class="px-4 py-3 font-semibold">Alamat</th>
-                <th class="px-4 py-3 font-semibold">Catatan</th>
-                <th class="px-4 py-3 font-semibold whitespace-nowrap">Total</th>
-                <th class="px-4 py-3 font-semibold">Status</th>
-                <th class="px-4 py-3 font-semibold">Aksi</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">No. Order</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Tanggal</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Nama</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">WhatsApp</th>
+                <th class="px-4 py-3 text-left font-semibold">Alamat</th>
+                <th class="px-4 py-3 text-left font-semibold">Catatan</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Total</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
-            <tbody id="ordersTableBody" class="divide-y divide-dark/10">
-              <!-- rows injected by admin.js -->
+            <tbody id="ordersTableBody">
+              <!-- akan diisi JS -->
             </tbody>
           </table>
         </div>
-      </div>
 
-      <!-- Mobile Cards -->
-      <div id="mobileCardList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden">
-        <!-- cards injected by admin.js -->
-      </div>
+        <div id="loadingState" class="py-12 text-center text-dark/40 hidden">
+          <div class="flex flex-col items-center gap-2">
+            <i class="fas fa-spinner fa-spin text-2xl text-kiwi"></i>
+            <span>Memuat data pesanan...</span>
+          </div>
+        </div>
 
-      <!-- Loading & Empty States -->
-      <div id="loadingState" class="hidden py-16 text-center text-dark/40">
-        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
-        <p>Memuat data pesanan...</p>
+        <div id="emptyState" class="hidden py-16 text-center">
+          <i class="fas fa-inbox text-4xl text-dark/20 mb-3"></i>
+          <p class="text-dark/50 font-medium">Belum ada pesanan masuk.</p>
+          <p class="text-dark/30 text-sm">Pantau terus, pesanan pertama akan muncul di sini.</p>
+        </div>
       </div>
-      <div id="emptyState" class="hidden py-16 text-center text-dark/40">
-        <i class="fas fa-inbox text-4xl mb-2"></i>
-        <p>Belum ada pesanan yang cocok.</p>
-      </div>
-
     </main>
   </div>
 
-  <!-- =============== MODAL DETAIL PESANAN =============== -->
-  <div id="detailModal" class="hidden fixed inset-0 bg-dark/60 items-center justify-center p-4">
-    <div class="bg-cream w-full max-w-lg rounded-3xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto scrollbar-none relative">
-      <button id="closeDetailModal" class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">
-        ✕
-      </button>
-      <h3 class="font-display font-600 text-xl mb-4">Detail Pesanan</h3>
-      <div id="detailContent" class="space-y-2 text-sm"></div>
+  <!-- ===== MODAL DETAIL ===== -->
+  <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-dark/40 backdrop-blur-sm">
+    <div class="bg-white max-w-lg w-full rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-600 text-xl">Detail Pesanan</h3>
+        <button id="closeDetailModal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">✕</button>
+      </div>
+      <div id="detailContent" class="space-y-3 text-sm"></div>
     </div>
   </div>
 
-  <!-- =============== TOAST CONTAINER =============== -->
-  <div id="toastContainer"></div>
+  <!-- ===== TOAST ===== -->
+  <div id="toastContainer" class="toast-container"></div>
 
-  <!-- =============== JAVASCRIPT (Kode Admin Anda) =============== -->
   <script type="module" src="admin.js"></script>
-
 </body>
 </html>
