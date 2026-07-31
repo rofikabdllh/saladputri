@@ -6,9 +6,13 @@
 <title>Admin — Salad Buah Putri</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
 
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome (wajib untuk ikon di kode admin baru) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
+<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -31,78 +35,202 @@
     }
   }
 </script>
+
 <style>
-  body { font-family: 'Poppins', sans-serif; }
+  body { font-family: 'Poppins', sans-serif; background: #FFF6F3; color: #4A2E3C; }
   .font-display { font-family: 'Quicksand', sans-serif; }
+  
+  /* Scrollbar */
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  
+  /* Skeleton loading */
+  .skeleton { background: #e5e7eb; border-radius: 9999px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+  /* Toast Notifications */
+  #toastContainer {
+    position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
+    z-index: 999; display: flex; flex-direction: column; gap: 8px; align-items: center;
+    width: 100%; padding: 0 1rem; pointer-events: none;
+  }
+  .toast-item {
+    background: #4A2E3C; color: #FFF6F3; font-size: 0.875rem; font-weight: 500;
+    padding: 10px 18px; border-radius: 9999px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    display: flex; align-items: center; gap: 0.5rem;
+    opacity: 1; transform: translateX(0); transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: auto;
+  }
+
+  /* Status Badges */
+  .badge-status {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.25rem 0.75rem; border-radius: 9999px;
+    font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .badge-status:hover { transform: scale(0.95); }
+  
+  .badge-menunggu { background: #FEF3C7; color: #B45309; }
+  .badge-dibayar { background: #DBEAFE; color: #1D4ED8; }
+  .badge-diproses { background: #E0E7FF; color: #4338CA; }
+  .badge-siap { background: #D1FAE5; color: #047857; }
+  .badge-selesai { background: #DCFCE7; color: #166534; }
+  .badge-batal { background: #FEE2E2; color: #991B1B; }
+
+  /* Tabel */
+  .table-row-zebra:nth-child(even) { background: #FAF5F3; }
+  .truncate-detail {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  }
+
+  /* Modal Detail */
+  #detailModal {
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); z-index: 100;
+  }
+  #detailModal:not(.hidden) { display: flex; }
+
+  /* Filter & Search */
+  .filter-btn { transition: all 0.2s; }
+  .filter-btn.active { background: #4A2E3C; color: #FFF6F3; }
+
+  /* Responsive table wrapper */
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>
 </head>
-<body class="bg-cream text-dark antialiased min-h-screen">
+<body>
 
-  <header class="sticky top-0 z-10 bg-cream/90 backdrop-blur border-b border-dark/10">
-    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-2xl">🥗</span>
-        <span class="font-display font-600 text-xl tracking-tight">Dashboard Pesanan</span>
+  <!-- =============== LOGIN SECTION =============== -->
+  <div id="loginSection" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-md border border-dark/10">
+      <div class="text-center mb-6">
+        <span class="text-4xl">🥗</span>
+        <h2 class="font-display font-700 text-2xl mt-2">Admin Salad Buah Putri</h2>
+        <p class="text-dark/50 text-sm mt-1">Silakan masuk untuk mengelola pesanan</p>
       </div>
-      <div class="flex items-center gap-2 text-sm font-medium text-kiwi-dark">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-kiwi"></span>
-        </span>
-        Live
-      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="loginEmail" class="block text-sm font-semibold mb-1.5">Email</label>
+          <input id="loginEmail" type="email" placeholder="admin@saladbuahputri.com" 
+                 class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-cream/50 focus:outline-none focus:ring-2 focus:ring-watermelon" required />
+        </div>
+        <div>
+          <label for="loginPassword" class="block text-sm font-semibold mb-1.5">Password</label>
+          <input id="loginPassword" type="password" placeholder="********" 
+                 class="w-full px-4 py-3 rounded-xl border border-dark/15 bg-cream/50 focus:outline-none focus:ring-2 focus:ring-watermelon" required />
+        </div>
+        <p id="loginError" class="hidden text-watermelon-dark text-sm font-medium text-center"></p>
+        <button type="submit" class="w-full bg-dark text-cream font-semibold py-3 rounded-full shadow-md hover:shadow-lg hover:bg-watermelon-dark transition">
+          <i class="fas fa-lock mr-2"></i> Masuk
+        </button>
+      </form>
     </div>
-  </header>
+  </div>
 
-  <main class="max-w-6xl mx-auto px-5 py-8">
+  <!-- =============== ADMIN CONTENT (Tersembunyi sampai login) =============== -->
+  <div id="adminContent" class="hidden min-h-screen pb-12">
+    
+    <!-- Header Admin -->
+    <header class="sticky top-0 z-20 bg-cream/90 backdrop-blur border-b border-dark/10">
+      <div class="max-w-6xl mx-auto px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🥗</span>
+          <span class="font-display font-600 text-xl tracking-tight">Dashboard Pesanan</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span id="greetingText" class="text-sm font-medium hidden sm:inline">Halo, Admin 👋</span>
+          <div class="flex items-center gap-2 text-xs text-kiwi-dark bg-kiwi/10 px-3 py-1 rounded-full">
+            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-kiwi"></span></span>
+            <span id="lastUpdatedText">Memuat...</span>
+          </div>
+          <button id="logoutBtn" class="text-sm font-medium text-dark/50 hover:text-red-500 transition">
+            <i class="fas fa-sign-out-alt"></i> Keluar
+          </button>
+        </div>
+      </div>
+    </header>
 
-    <!-- Ringkasan -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-      <div class="bg-white rounded-2xl p-5 border border-dark/10">
-        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Pesanan</p>
-        <p id="statTotalOrders" class="font-display font-700 text-2xl mt-1">0</p>
-      </div>
-      <div class="bg-white rounded-2xl p-5 border border-dark/10">
-        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Omzet</p>
-        <p id="statTotalRevenue" class="font-display font-700 text-2xl mt-1">Rp 0</p>
-      </div>
-      <div class="bg-white rounded-2xl p-5 border border-dark/10 hidden sm:block">
-        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Pesanan Terakhir</p>
-        <p id="statLastOrder" class="font-display font-700 text-2xl mt-1">—</p>
-      </div>
-    </div>
+    <main class="max-w-6xl mx-auto px-5 py-6 space-y-6">
+      
+      <!-- Stats Cards -->
+      <div id="statsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
 
-    <!-- Tabel -->
-    <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-          <thead class="bg-dark text-cream">
-            <tr>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">No. Order</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
-              <th class="px-4 py-3 font-semibold">Alamat</th>
-              <th class="px-4 py-3 font-semibold">Pesanan</th>
-              <th class="px-4 py-3 font-semibold">Catatan</th>
-              <th class="px-4 py-3 font-semibold whitespace-nowrap">Total</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody" class="divide-y divide-dark/10">
-            <!-- baris pesanan di-render oleh admin.js -->
-          </tbody>
-        </table>
+      <!-- Filter & Search -->
+      <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div class="flex flex-wrap gap-2">
+          <button class="filter-btn active bg-dark text-cream px-4 py-2 rounded-full text-xs font-semibold shadow-sm" data-filter="semua">Semua</button>
+          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="hari-ini">Hari Ini</button>
+          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="minggu-ini">Minggu Ini</button>
+          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="belum-proses">Belum Proses</button>
+          <button class="filter-btn bg-white border border-dark/10 px-4 py-2 rounded-full text-xs font-semibold hover:bg-cream" data-filter="selesai">Selesai</button>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-dark/30"></i>
+          <input id="searchInput" type="text" placeholder="Cari nomor order / nama..." 
+                 class="w-full pl-9 pr-4 py-2 rounded-full border border-dark/10 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon text-sm" />
+        </div>
       </div>
 
-      <div id="loadingState" class="py-16 text-center text-dark/40">
-        Memuat data pesanan...
+      <!-- Result Count -->
+      <p id="resultCount" class="hidden text-xs text-dark/40 font-semibold"></p>
+
+      <!-- Desktop Table -->
+      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden hidden md:block">
+        <div class="table-wrapper">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-dark text-cream">
+              <tr>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">No. Order</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
+                <th class="px-4 py-3 font-semibold">Alamat</th>
+                <th class="px-4 py-3 font-semibold">Catatan</th>
+                <th class="px-4 py-3 font-semibold whitespace-nowrap">Total</th>
+                <th class="px-4 py-3 font-semibold">Status</th>
+                <th class="px-4 py-3 font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-dark/10">
+              <!-- rows injected by admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div id="mobileCardList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden">
+        <!-- cards injected by admin.js -->
+      </div>
+
+      <!-- Loading & Empty States -->
+      <div id="loadingState" class="hidden py-16 text-center text-dark/40">
+        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+        <p>Memuat data pesanan...</p>
       </div>
       <div id="emptyState" class="hidden py-16 text-center text-dark/40">
-        Belum ada pesanan masuk.
+        <i class="fas fa-inbox text-4xl mb-2"></i>
+        <p>Belum ada pesanan yang cocok.</p>
       </div>
-    </div>
-  </main>
 
+    </main>
+  </div>
+
+  <!-- =============== MODAL DETAIL PESANAN =============== -->
+  <div id="detailModal" class="hidden fixed inset-0 bg-dark/60 items-center justify-center p-4">
+    <div class="bg-cream w-full max-w-lg rounded-3xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto scrollbar-none relative">
+      <button id="closeDetailModal" class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">
+        ✕
+      </button>
+      <h3 class="font-display font-600 text-xl mb-4">Detail Pesanan</h3>
+      <div id="detailContent" class="space-y-2 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- =============== TOAST CONTAINER =============== -->
+  <div id="toastContainer"></div>
+
+  <!-- =============== JAVASCRIPT (Kode Admin Anda) =============== -->
   <script type="module" src="admin.js"></script>
+
 </body>
 </html>
