@@ -1,310 +1,107 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Salad Buah Putri</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            cream: '#FFF6F3',
-            dark: '#4A2E3C',
-            watermelon: '#FF8FA6',
-            'watermelon-dark': '#E8637F',
-            mango: '#FFCB94',
-            kiwi: '#B497D6',
-            'kiwi-dark': '#8A67B8',
-          },
-          fontFamily: {
-            display: ['Quicksand', 'sans-serif'],
-            body: ['Poppins', 'sans-serif'],
-          },
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Salad Buah Putri</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: '#FFF6F3',
+          dark: '#4A2E3C',
+          watermelon: '#FF8FA6',
+          'watermelon-dark': '#E8637F',
+          mango: '#FFCB94',
+          kiwi: '#B497D6',
+          'kiwi-dark': '#8A67B8',
+        },
+        fontFamily: {
+          display: ['Quicksand', 'sans-serif'],
+          body: ['Poppins', 'sans-serif'],
+        },
       }
     }
-  </script>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-  <style>
-    body { font-family: 'Poppins', sans-serif; background: #FFF6F3; }
-    .font-display { font-family: 'Quicksand', sans-serif; }
-
-    .skeleton {
-      background: linear-gradient(90deg, #f0ece9 25%, #e6e0db 50%, #f0ece9 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 8px;
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    .toast-container {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      max-width: 380px;
-      width: 100%;
-    }
-    .toast-item {
-      background: #4A2E3C;
-      color: #FFF6F3;
-      padding: 0.75rem 1.25rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      animation: slideIn 0.3s ease;
-    }
-    .toast-item i { font-size: 1.1rem; }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(20px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-
-    .badge-status {
-      padding: 0.2rem 0.7rem;
-      border-radius: 9999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: capitalize;
-      display: inline-block;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .badge-status:hover {
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .badge-menunggu { background: #FDE68A; color: #92400E; }
-    .badge-dibayar { background: #93C5FD; color: #1E3A8A; }
-    .badge-diproses { background: #D8B4FE; color: #5B21B6; }
-    .badge-siap { background: #99F6E4; color: #115E59; }
-    .badge-selesai { background: #86EFAC; color: #14532D; }
-    .badge-batal { background: #FCA5A5; color: #7F1D1D; }
-
-    .table-row-zebra:nth-child(even) {
-      background: #faf7f5;
-    }
-    .table-row-zebra:hover {
-      background: #f1ebe7 !important;
-    }
-
-    .truncate-detail {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      max-height: 3em;
-      line-height: 1.5em;
-    }
-
-    .stat-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      cursor: pointer;
-    }
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    }
-
-    .filter-btn {
-      padding: 0.4rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: transparent;
-      border: 1px solid #e5e0db;
-      color: #4A2E3C;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .filter-btn:hover {
-      background: #f1ebe7;
-    }
-    .filter-btn.active {
-      background: #4A2E3C;
-      color: #FFF6F3;
-      border-color: #4A2E3C;
-    }
-
-    .status-dropdown {
-      background: white;
-      border: 1px solid #e5e0db;
-      border-radius: 8px;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #4A2E3C;
-      cursor: pointer;
-      outline: none;
-    }
-    .status-dropdown:focus {
-      border-color: #E8637F;
-      outline: 2px solid #FF8FA6;
-    }
-
-    @media (max-width: 640px) {
-      .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-      .desktop-table { display: none; }
-      .mobile-card-list { display: flex; flex-direction: column; gap: 0.75rem; }
-      .toast-container { left: 1rem; right: 1rem; bottom: 1rem; max-width: 100%; }
-    }
-    @media (min-width: 641px) {
-      .mobile-card-list { display: none; }
-      .desktop-table { display: table; }
-    }
-  </style>
+  }
+</script>
+<style>
+  body { font-family: 'Poppins', sans-serif; }
+  .font-display { font-family: 'Quicksand', sans-serif; }
+</style>
 </head>
-<body>
-  <!-- Login Section -->
-  <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
-    <div class="max-w-md w-full bg-white rounded-3xl border border-dark/10 shadow-lg p-6 sm:p-8">
-      <h2 class="font-display font-600 text-3xl text-center">🔐 Admin Login</h2>
-      <p class="text-dark/60 text-sm text-center mt-1 mb-6">Masukkan email dan password untuk mengakses dashboard</p>
-      <form id="loginForm" class="space-y-4">
-        <div>
-          <label for="loginEmail" class="block text-sm font-semibold mb-1.5">Email</label>
-          <input type="email" id="loginEmail" placeholder="admin@saladbuahputri.com" required
-                 class="w-full px-4 py-3 rounded-xl border border-dark/15 focus:outline-none focus:ring-2 focus:ring-watermelon" />
-        </div>
-        <div>
-          <label for="loginPassword" class="block text-sm font-semibold mb-1.5">Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required
-                 class="w-full px-4 py-3 rounded-xl border border-dark/15 focus:outline-none focus:ring-2 focus:ring-watermelon" />
-        </div>
-        <button type="submit" id="loginBtn" class="w-full bg-dark text-cream font-semibold py-3 rounded-full hover:bg-watermelon-dark transition">
-          Login
-        </button>
-        <p id="loginError" class="hidden text-watermelon-dark text-sm font-medium text-center"></p>
-      </form>
+<body class="bg-cream text-dark antialiased min-h-screen">
+
+  <header class="sticky top-0 z-10 bg-cream/90 backdrop-blur border-b border-dark/10">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🥗</span>
+        <span class="font-display font-600 text-xl tracking-tight">Dashboard Pesanan</span>
+      </div>
+      <div class="flex items-center gap-2 text-sm font-medium text-kiwi-dark">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-kiwi"></span>
+        </span>
+        Live
+      </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Dashboard -->
-  <div id="adminContent" class="hidden">
-    <!-- Header -->
-    <header class="sticky top-0 z-20 bg-cream/90 backdrop-blur-md border-b border-dark/10">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🥗</span>
-          <div>
-            <h1 class="font-display font-600 text-lg tracking-tight" id="greetingText">Dashboard Admin</h1>
-            <p class="text-xs text-dark/50" id="userEmailDisplay">admin@saladbuahputri.com</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="text-xs font-medium text-kiwi-dark flex items-center gap-1">
-            <span class="relative flex h-2.5 w-2.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-kiwi opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-kiwi"></span>
-            </span>
-            Live
-          </span>
-          <span class="text-xs text-dark/40 hidden sm:inline" id="lastUpdatedText">Terakhir diperbarui: --</span>
-          <button id="logoutBtn" class="text-sm font-semibold text-dark/60 hover:text-watermelon-dark transition">Logout</button>
-        </div>
-      </div>
-    </header>
-    <!-- Main -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-      <!-- Statistik -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 stat-grid" id="statsContainer">
-        <!-- JS akan isi dengan skeleton -->
-      </div>
+  <main class="max-w-6xl mx-auto px-5 py-8">
 
-      <!-- Search & Filter -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div class="relative flex-1 max-w-md sm:max-w-lg">
-          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-dark/30 text-sm"></i>
-          <input type="text" id="searchInput" placeholder="Cari No. Order, Nama, atau WhatsApp..."
-                 class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-dark/10 bg-white focus:outline-none focus:ring-2 focus:ring-watermelon text-sm" />
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button class="filter-btn active" data-filter="semua">Semua</button>
-          <button class="filter-btn" data-filter="hari-ini">Hari Ini</button>
-          <button class="filter-btn" data-filter="minggu-ini">Minggu Ini</button>
-          <button class="filter-btn" data-filter="belum-proses">Belum Diproses</button>
-          <button class="filter-btn" data-filter="selesai">Selesai</button>
-        </div>
+    <!-- Ringkasan -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white rounded-2xl p-5 border border-dark/10">
+        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Pesanan</p>
+        <p id="statTotalOrders" class="font-display font-700 text-2xl mt-1">0</p>
       </div>
-
-      <!-- Result Count -->
-      <div id="resultCount" class="text-sm text-dark/50 mb-3 hidden">0 pesanan ditemukan</div>
-
-      <!-- Tabel Desktop -->
-      <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden shadow-sm desktop-table">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-dark text-cream">
-              <tr>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">No. Order</th>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Tanggal</th>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Nama</th>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">WhatsApp</th>
-                <th class="px-4 py-3 text-left font-semibold">Alamat</th>
-                <th class="px-4 py-3 text-left font-semibold">Catatan</th>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Total</th>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Status</th>
-                <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody">
-              <!-- JS akan isi -->
-            </tbody>
-          </table>
-        </div>
-        <div id="loadingState" class="py-12 text-center text-dark/40 hidden">
-          <div class="flex flex-col items-center gap-2">
-            <i class="fas fa-spinner fa-spin text-2xl text-kiwi"></i>
-            <span>Memuat data pesanan...</span>
-          </div>
-        </div>
-        <div id="emptyState" class="hidden py-16 text-center">
-          <i class="fas fa-inbox text-4xl text-dark/20 mb-3"></i>
-          <p class="text-dark/50 font-medium">Belum ada pesanan masuk.</p>
-          <p class="text-dark/30 text-sm">Pantau terus, pesanan pertama akan muncul di sini.</p>
-        </div>
+      <div class="bg-white rounded-2xl p-5 border border-dark/10">
+        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Total Omzet</p>
+        <p id="statTotalRevenue" class="font-display font-700 text-2xl mt-1">Rp 0</p>
       </div>
-
-      <!-- Mobile Card List -->
-      <div id="mobileCardList" class="mobile-card-list">
-        <!-- JS akan isi -->
+      <div class="bg-white rounded-2xl p-5 border border-dark/10 hidden sm:block">
+        <p class="text-dark/50 text-xs font-semibold uppercase tracking-wide">Pesanan Terakhir</p>
+        <p id="statLastOrder" class="font-display font-700 text-2xl mt-1">—</p>
       </div>
-    </main>
-  </div>
-
-  <!-- Modal Detail -->
-  <div id="detailModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-dark/40 backdrop-blur-sm">
-    <div class="bg-white max-w-lg w-full rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-display font-600 text-xl">Detail Pesanan</h3>
-        <button id="closeDetailModal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-dark/5 text-xl">✕</button>
-      </div>
-      <div id="detailContent" class="space-y-3 text-sm"></div>
     </div>
-  </div>
 
-  <!-- Toast -->
-  <div id="toastContainer" class="toast-container"></div>
+    <!-- Tabel -->
+    <div class="bg-white rounded-2xl border border-dark/10 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-dark text-cream">
+            <tr>
+              <th class="px-4 py-3 font-semibold whitespace-nowrap">No. Order</th>
+              <th class="px-4 py-3 font-semibold whitespace-nowrap">Tanggal</th>
+              <th class="px-4 py-3 font-semibold whitespace-nowrap">Nama</th>
+              <th class="px-4 py-3 font-semibold whitespace-nowrap">WhatsApp</th>
+              <th class="px-4 py-3 font-semibold">Alamat</th>
+              <th class="px-4 py-3 font-semibold">Pesanan</th>
+              <th class="px-4 py-3 font-semibold">Catatan</th>
+              <th class="px-4 py-3 font-semibold whitespace-nowrap">Total</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody" class="divide-y divide-dark/10">
+            <!-- baris pesanan di-render oleh admin.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="loadingState" class="py-16 text-center text-dark/40">
+        Memuat data pesanan...
+      </div>
+      <div id="emptyState" class="hidden py-16 text-center text-dark/40">
+        Belum ada pesanan masuk.
+      </div>
+    </div>
+  </main>
 
   <script type="module" src="admin.js"></script>
 </body>
