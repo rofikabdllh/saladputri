@@ -28,21 +28,28 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ------------------------------------------------------------
-// DATA TOKO (sesuaikan)
+// DATA TOKO — ⚠️ Semua nilai di bawah sudah diperbarui
 // ------------------------------------------------------------
-const WA_NUMBER = "6281915779457";
-const REKENING_INFO = "BRI 682401001050507 a.n. Eka Putri Nugraheni";
+const WA_NUMBER = "6281915779457"; // Nomor WA toko (format 62xxxx)
+
+// Daftar 3 rekening bank sesuai permintaan
+const PAYMENT_OPTIONS = [
+  { bank: "Seabank", rekening: "901750465728", atasNama: "Eka Putri Nugraheni" },
+  { bank: "BRI", rekening: "682401001050507", atasNama: "Eka Putri Nugraheni" },
+  { bank: "BNI", rekening: "2026044682", atasNama: "Eka Putri Nugraheni" }
+];
 
 const STORE_INFO = {
   rating: "4.9",
-  totalReviews: "258 ulasan",
+  totalReviews: "128 ulasan",
   totalOrders: "500+ pesanan",
   jamOperasional: "08.00 – 20.00 WIB",
   estimasiProses: "15–30 menit setelah pembayaran dikonfirmasi",
-  lokasi: "📍 Purwokerto, Indonesia",
-  mapsUrl: "https://maps.app.goo.gl/pgM2RfDkDbaK4Ucb7?g_st=ac",
+  lokasi: "📍 Yogyakarta, Indonesia",
+  mapsUrl: "https://maps.app.goo.gl/8DgVgqho4Y9zJDPu7", // Link GMaps baru
 };
 
+// Ukuran & harga
 const SIZES = [
   { id: "200ml", label: "200 ml", harga: 10000 },
   { id: "300ml", label: "300 ml", harga: 12000 },
@@ -106,7 +113,6 @@ const inputCatatan = document.getElementById("inputCatatan");
 
 const successModal = document.getElementById("successModal");
 const successSummary = document.getElementById("successSummary");
-const rekeningInfo = document.getElementById("rekeningInfo");
 const waButton = document.getElementById("waButton");
 const closeSuccessBtn = document.getElementById("closeSuccessBtn");
 const orderNumberBadge = document.getElementById("orderNumberBadge");
@@ -114,7 +120,10 @@ const orderStatusBadge = document.getElementById("orderStatusBadge");
 const successEstimasi = document.getElementById("successEstimasi");
 const successJamOperasional = document.getElementById("successJamOperasional");
 const successTotalTransfer = document.getElementById("successTotalTransfer");
-const copyRekeningBtn = document.getElementById("copyRekeningBtn");
+
+// Elemen baru untuk rekening
+const rekeningList = document.getElementById("rekeningList");
+const copyAllRekeningBtn = document.getElementById("copyAllRekeningBtn");
 const copyTotalBtn = document.getElementById("copyTotalBtn");
 
 const mobileCartBar = document.getElementById("mobileCartBar");
@@ -163,7 +172,7 @@ function generateOrderNumber() {
 }
 
 // ------------------------------------------------------------
-// TOAST
+// TOAST NOTIFICATION
 // ------------------------------------------------------------
 function showToast(message) {
   const toast = document.createElement("div");
@@ -599,7 +608,7 @@ checkoutForm.addEventListener("submit", async (e) => {
 });
 
 // ------------------------------------------------------------
-// SUKSES: RINGKASAN + TOMBOL WHATSAPP
+// SUKSES: RINGKASAN + TOMBOL WHATSAPP + REKENING
 // ------------------------------------------------------------
 function showSuccess(order) {
   orderNumberBadge.textContent = `#${order.nomorOrder}`;
@@ -623,7 +632,7 @@ function showSuccess(order) {
       <p><span class="font-semibold text-dark">Nama:</span> ${order.nama}</p>
       <p><span class="font-semibold text-dark">WA:</span> ${order.wa}</p>
       <p><span class="font-semibold text-dark">Alamat:</span> ${order.alamat}</p>
-      ${order.catatan ? `<p><span class="font-semibold text-dark">Catatan:</span> ${order.catatan}</p>` : ""}
+      ${order.catatan && order.catatan !== "-" ? `<p><span class="font-semibold text-dark">Catatan:</span> ${order.catatan}</p>` : ""}
     </div>
     <div class="border-t border-dark/10 pt-2 space-y-1">
       ${rows}
@@ -634,8 +643,33 @@ function showSuccess(order) {
     </div>
   `;
 
-  rekeningInfo.textContent = REKENING_INFO;
+  // Render daftar rekening (3 bank)
+  rekeningList.innerHTML = PAYMENT_OPTIONS.map(opt => `
+    <div class="flex justify-between items-center bg-white/50 p-2.5 rounded-lg border border-kiwi/20">
+      <div>
+        <span class="font-semibold text-sm">${opt.bank}</span>
+        <span class="text-dark/70 text-sm ml-2">${opt.rekening}</span>
+        <span class="text-[10px] text-dark/40 block">a.n. ${opt.atasNama}</span>
+      </div>
+      <button class="copy-rek-single text-[10px] font-semibold bg-white border border-kiwi/40 px-2.5 py-1 rounded-full hover:bg-kiwi/10" data-bank="${opt.bank}" data-rek="${opt.rekening}" data-an="${opt.atasNama}">Copy</button>
+    </div>
+  `).join("");
 
+  // Event listener untuk tombol copy per bank
+  document.querySelectorAll('.copy-rek-single').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const text = `${this.dataset.bank}: ${this.dataset.rek} a.n. ${this.dataset.an}`;
+      copyToClipboard(text, this);
+    });
+  });
+
+  // Event listener untuk tombol copy semua rekening
+  copyAllRekeningBtn.onclick = function() {
+    const text = PAYMENT_OPTIONS.map(opt => `${opt.bank}: ${opt.rekening} a.n. ${opt.atasNama}`).join("\n");
+    copyToClipboard(text, this);
+  };
+
+  // Buat pesan WhatsApp
   const itemLines = order.items
     .map((item) => `- ${item.nama} x${item.qty} = ${formatRupiah(item.subtotal)}`)
     .join("\n");
@@ -650,7 +684,7 @@ function showSuccess(order) {
     `*Total: ${formatRupiah(order.totalHarga)}*`,
     ``,
     `*Alamat:* ${order.alamat}`,
-    order.catatan ? `*Catatan:* ${order.catatan}` : ``,
+    order.catatan && order.catatan !== "-" ? `*Catatan:* ${order.catatan}` : ``,
     ``,
     `Berikut saya lampirkan bukti transfernya 🙏`,
   ]
@@ -661,11 +695,6 @@ function showSuccess(order) {
 
   openSuccess();
 }
-
-copyRekeningBtn.addEventListener("click", () => copyToClipboard(REKENING_INFO, copyRekeningBtn));
-copyTotalBtn.addEventListener("click", () =>
-  copyToClipboard(successTotalTransfer.textContent.replace(/[^\d]/g, ""), copyTotalBtn)
-);
 
 // ------------------------------------------------------------
 // INIT
